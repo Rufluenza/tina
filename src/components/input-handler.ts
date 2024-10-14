@@ -1,19 +1,37 @@
 // input-handler.ts
+'use client';
+
 import { useState, useEffect } from 'react';
 
 export function useInputHandler(keys: string[][]) {
+  // State variables
   const [selectedRow, setSelectedRow] = useState(0);
   const [selectedCol, setSelectedCol] = useState(0);
   const [inputString, setInputString] = useState('');
   const [gamepadIndex, setGamepadIndex] = useState<number | null>(null);
+
+  // State variables for edge detection
+  // State variables for debounce timing
+  const [lastInputTime, setLastInputTime] = useState(0);
+  const inputDelay = 100; // Adjust as needed (milliseconds)
 
   const moveSelection = (direction: 'up' | 'down' | 'left' | 'right') => {
     setSelectedRow((prevRow) => {
       let newRow = prevRow;
       if (direction === 'up' && prevRow > 0) {
         newRow = prevRow - 1;
+        if (selectedCol >= keys[newRow].length) {
+          setSelectedCol(keys[newRow].length - 1);
+        } else {
+          setSelectedCol((prevCol) => Math.min(prevCol, keys[newRow].length - 1));
+        }
       } else if (direction === 'down' && prevRow < keys.length - 1) {
         newRow = prevRow + 1;
+        if (selectedCol >= keys[newRow].length) {
+          setSelectedCol(keys[newRow].length - 1);
+        } else {
+          setSelectedCol((prevCol) => Math.min(prevCol, keys[newRow].length - 1));
+        }
       }
       return newRow;
     });
@@ -45,6 +63,7 @@ export function useInputHandler(keys: string[][]) {
     }
   };
 
+  // Keyboard Input Handling
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
@@ -69,6 +88,7 @@ export function useInputHandler(keys: string[][]) {
     };
   }, [selectedRow, selectedCol, keys]);
 
+  // Gamepad Connection Handling
   useEffect(() => {
     const handleGamepadConnected = (event: GamepadEvent) => {
       setGamepadIndex(event.gamepad.index);
@@ -87,8 +107,14 @@ export function useInputHandler(keys: string[][]) {
     };
   }, []);
 
+    // Gamepad Input Handling with Edge Detection and Local Previous States
+  // Gamepad Input Handling with Edge Detection and Local Previous States
   useEffect(() => {
     let animationFrame: number;
+
+    const deadzone = 0.4; // Deadzone threshold
+    let prevAxesActive = { x: false, y: false };
+    let prevButtonsPressed: boolean[] = [];
 
     const pollGamepad = () => {
       if (gamepadIndex !== null) {
@@ -97,27 +123,65 @@ export function useInputHandler(keys: string[][]) {
 
         if (gamepad) {
           const { buttons, axes } = gamepad;
+          const currentTime = Date.now();
 
-          // Map joystick axes to navigation
-          const threshold = 0.5; // Deadzone threshold
-          const [leftStickX, leftStickY] = axes;
+          // Edge detection for axes (joystick movements)
+          const leftStickX = axes[0];
+          const leftStickY = axes[1];
 
-          if (leftStickY < -threshold) {
-            moveSelection('up');
-          } else if (leftStickY > threshold) {
-            moveSelection('down');
+          // Determine if axes are active beyond the deadzone
+          const axisXActive = Math.abs(leftStickX) > deadzone;
+          const axisYActive = Math.abs(leftStickY) > deadzone;
+
+          // Edge detection for X axis (left/right)
+          if (axisXActive && !prevAxesActive.x && currentTime - lastInputTime > inputDelay) {
+            // Joystick moved in X axis beyond deadzone
+            if (leftStickX > 0) {
+              moveSelection('right');
+            } else if (leftStickX < 0) {
+              moveSelection('left');
+            }
+            setLastInputTime(currentTime);
           }
 
-          if (leftStickX < -threshold) {
-            moveSelection('left');
-          } else if (leftStickX > threshold) {
-            moveSelection('right');
+          // Edge detection for Y axis (up/down)
+          if (axisYActive && !prevAxesActive.y && currentTime - lastInputTime > inputDelay) {
+            // Joystick moved in Y axis beyond deadzone
+            if (leftStickY > 0) {
+              moveSelection('down');
+            } else if (leftStickY < 0) {
+              moveSelection('up');
+            }
+            setLastInputTime(currentTime);
           }
 
-          // Map buttons to actions
-          if (buttons[0].pressed) {
-            const key = keys[selectedRow][selectedCol];
-            handleKeyPress(key);
+          // Update previous axes active states
+          prevAxesActive = { x: axisXActive, y: axisYActive };
+
+          // Edge detection for buttons
+          if (prevButtonsPressed.length === 0) {
+            prevButtonsPressed = buttons.map((button) => button.pressed);
+          } else {
+            buttons.forEach((button, index) => {
+              const prevPressed = prevButtonsPressed[index];
+              if (button.pressed && !prevPressed) {
+                // Button was just pressed
+                if (index === 0) {
+                  // "A" button
+                  const key = keys[selectedRow][selectedCol];
+                  handleKeyPress(key);
+                  setLastInputTime(currentTime);
+                } else if (index === 3) {
+                  // delete button
+                  handleKeyPress('Backspace');
+                  setLastInputTime(currentTime);
+                }
+                // Handle other buttons if needed
+              }
+            });
+
+            // Update previous button states
+            prevButtonsPressed = buttons.map((button) => button.pressed);
           }
         }
       }
@@ -130,7 +194,7 @@ export function useInputHandler(keys: string[][]) {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [gamepadIndex, selectedRow, selectedCol, keys]);
+  }, [gamepadIndex, selectedRow, selectedCol, keys, lastInputTime]);
 
   return {
     selectedRow,

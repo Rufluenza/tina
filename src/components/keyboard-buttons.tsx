@@ -1,6 +1,8 @@
+// keyboard-buttons.tsx
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
+import { useInputHandler } from './input-handler';
 
 export default function Keyboard() {
   const keys = [
@@ -11,65 +13,11 @@ export default function Keyboard() {
     ['Space']
   ];
 
-  const [selectedRow, setSelectedRow] = useState(0);
-  const [selectedCol, setSelectedCol] = useState(0);
-  const [inputString, setInputString] = useState('');
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      event.preventDefault();
-
-      if (event.key === 'ArrowUp') {
-        if (selectedRow > 0) {
-          const newRow = selectedRow - 1;
-          const newCol = Math.min(selectedCol, keys[newRow].length - 1);
-          setSelectedRow(newRow);
-          setSelectedCol(newCol);
-        }
-      } else if (event.key === 'ArrowDown') {
-        if (selectedRow < keys.length - 1) {
-          const newRow = selectedRow + 1;
-          const newCol = Math.min(selectedCol, keys[newRow].length - 1);
-          setSelectedRow(newRow);
-          setSelectedCol(newCol);
-        }
-      } else if (event.key === 'ArrowLeft') {
-        if (selectedCol > 0) {
-          setSelectedCol(selectedCol - 1);
-        }
-      } else if (event.key === 'ArrowRight') {
-        if (selectedCol < keys[selectedRow].length - 1) {
-          setSelectedCol(selectedCol + 1);
-        }
-      } else if (event.key === 'Enter') {
-        const key = keys[selectedRow][selectedCol];
-        handleKeyPress(key);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedRow, selectedCol, inputString]);
-
-  interface KeyPressHandler {
-    (key: string): void;
-  }
-
-  const handleKeyPress: KeyPressHandler = (key) => {
-    if (key === 'Backspace') {
-      setInputString(inputString.slice(0, -1));
-    } else if (key === 'Space') {
-      setInputString(inputString + ' ');
-    } else if (key === 'Enter') {
-      setInputString(inputString + '\n');
-    } else if (key === 'Caps Lock' || key === 'Back') {
-      // Implement Caps Lock or Back functionality if needed
-    } else {
-      setInputString(inputString + key);
-    }
-  };
+  const {
+    selectedRow,
+    selectedCol,
+    inputString,
+  } = useInputHandler(keys);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
