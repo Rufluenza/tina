@@ -18,15 +18,24 @@ export function useInputHandler(keys: string[][]) {
   const moveSelection = (direction: 'up' | 'down' | 'left' | 'right') => {
     setSelectedRow((prevRow) => {
       let newRow = prevRow;
-      if (direction === 'up' && prevRow > 0) {
-        newRow = prevRow - 1;
+      if (direction === 'up') {
+        if (prevRow > 0) {
+          newRow = prevRow - 1;
+        } else if (prevRow == 0) {
+          newRow = keys.length - 1;
+        }
+        
         if (selectedCol >= keys[newRow].length) {
           setSelectedCol(keys[newRow].length - 1);
         } else {
           setSelectedCol((prevCol) => Math.min(prevCol, keys[newRow].length - 1));
         }
-      } else if (direction === 'down' && prevRow < keys.length - 1) {
-        newRow = prevRow + 1;
+      } else if (direction === 'down') {
+        if (prevRow < keys.length - 1) {
+          newRow = prevRow + 1;
+        } else if (prevRow == keys.length - 1) {
+          newRow = 0;
+        }
         if (selectedCol >= keys[newRow].length) {
           setSelectedCol(keys[newRow].length - 1);
         } else {
@@ -40,10 +49,19 @@ export function useInputHandler(keys: string[][]) {
       let newCol = prevCol;
       const currentRowLength = keys[selectedRow].length;
 
-      if (direction === 'left' && prevCol > 0) {
-        newCol = prevCol - 1;
-      } else if (direction === 'right' && prevCol < currentRowLength - 1) {
-        newCol = prevCol + 1;
+      if (direction === 'left') {
+        if (prevCol > 0) {
+          newCol = prevCol - 1;
+        } else if (prevCol == 0) {
+          newCol = currentRowLength - 1;
+        }
+      } else if (direction === 'right') {
+        if (prevCol < currentRowLength - 1) {
+          newCol = prevCol + 1;
+        } else if (prevCol == currentRowLength - 1) {
+          newCol = 0;
+        }
+
       }
       return newCol;
     });

@@ -6,10 +6,10 @@ import { useInputHandler } from './input-handler';
 
 export default function Keyboard() {
   const keys = [
-    ['Back', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Backspace'],
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Å', '"'],
-    ['Caps Lock', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Æ', 'Ø', 'Enter'],
-    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '-'],
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Å'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Æ', 'Ø'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
     ['Space']
   ];
 
@@ -31,7 +31,7 @@ export default function Keyboard() {
                   key={keyIndex}
                   variant="outline"
                   className={`
-                    h-12 font-medium text-sm
+                    h-12 font-bold text-sm
                     ${key === 'Space' ? 'flex-grow flex-basis-[60%] max-w-[600px]' : 'w-12'}
                     ${['Backspace', 'Enter'].includes(key) ? 'w-20' : ''}
                     ${['Back', 'Caps Lock'].includes(key) ? 'w-24' : ''}
