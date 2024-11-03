@@ -1,0 +1,1 @@
+#send_command("AT+CNMI=2,2,0,0,0") # Set SMS notification

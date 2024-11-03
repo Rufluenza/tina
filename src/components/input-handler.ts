@@ -97,6 +97,8 @@ export function useInputHandler(keys: string[][]) {
       } else if (event.key === 'Enter') {
         const key = keys[selectedRow][selectedCol];
         handleKeyPress(key);
+      } else if (event.key === 'Backspace') {
+        handleKeyPress('Backspace');
       }
     };
 
@@ -184,12 +186,12 @@ export function useInputHandler(keys: string[][]) {
               const prevPressed = prevButtonsPressed[index];
               if (button.pressed && !prevPressed) {
                 // Button was just pressed
-                if (index === 0) {
+                if (index === 0) { // "TOP HØJRE" KNAP
                   // "A" button
                   const key = keys[selectedRow][selectedCol];
                   handleKeyPress(key);
                   setLastInputTime(currentTime);
-                } else if (index === 3) {
+                } else if (index === 3) { // "TOP VENSTRE" KNAP
                   // delete button
                   handleKeyPress('Backspace');
                   setLastInputTime(currentTime);
@@ -218,5 +220,8 @@ export function useInputHandler(keys: string[][]) {
     selectedRow,
     selectedCol,
     inputString,
+    setSelectedRow,
+    setSelectedCol,
+    handleKeyPress
   };
 }

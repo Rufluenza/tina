@@ -1,6 +1,5 @@
-// keyboard-buttons.tsx
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useInputHandler } from './input-handler';
 
@@ -17,7 +16,13 @@ export default function Keyboard() {
     selectedRow,
     selectedCol,
     inputString,
+    setSelectedRow,
+    setSelectedCol,
+    handleKeyPress
   } = useInputHandler(keys);
+
+  // New state for managing hover
+  const [hoveredKey, setHoveredKey] = useState<{ row: number; col: number } | null>(null);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -31,13 +36,31 @@ export default function Keyboard() {
                   key={keyIndex}
                   variant="outline"
                   className={`
-                    h-12 font-bold text-sm
+                    h-12 font-bold text-4xl
                     ${key === 'Space' ? 'flex-grow flex-basis-[60%] max-w-[600px]' : 'w-12'}
                     ${['Backspace', 'Enter'].includes(key) ? 'w-20' : ''}
                     ${['Back', 'Caps Lock'].includes(key) ? 'w-24' : ''}
-                    ${['Å', 'Æ', 'Ø', '"'].includes(key) ? 'w-12 text-lg' : ''}
-                    ${selectedRow === rowIndex && selectedCol === keyIndex ? 'bg-black text-white' : ''}
+                    ${['Å', 'Æ', 'Ø', '"'].includes(key) ? 'w-12 text-4xl' : ''}
+                    ${
+                      (selectedRow === rowIndex && selectedCol === keyIndex) ||
+                      (hoveredKey?.row === rowIndex && hoveredKey?.col === keyIndex)
+                        ? 'bg-black text-white'
+                        : ''
+                    }
                   `}
+                  // Add hover effect not only
+                  
+                  onMouseEnter={() => {
+                    setHoveredKey({ row: rowIndex, col: keyIndex });
+                    setSelectedRow(rowIndex);
+                    setSelectedCol(keyIndex);
+                  }}
+                  onMouseLeave={() => setHoveredKey(null)}
+                  onClick={() => handleKeyPress(key)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handleKeyPress('Backspace');
+                  }}
                 >
                   {key}
                 </Button>
