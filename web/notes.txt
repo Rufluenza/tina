@@ -1,0 +1,7 @@
+
+Generate a new Prisma migration (database schema change) and apply it to the database:
+npx prisma migrate dev --name init
+
+
+Add a field e.g `direction` to the `Message` model in the Prisma schema:
+npx prisma migrate dev --name add-message-direction

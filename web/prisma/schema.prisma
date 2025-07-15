@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum MessageDirection {
+  INCOMING
+  OUTGOING
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  name     String   @default("")
+  messages Message[] @relation("Messages")
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  contactId Int
+  direction MessageDirection
+  contact   Contact  @relation("Messages", fields: [contactId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model UserSettings {
+  id        Int      @id @default(autoincrement())
+  name      String   @default("User")
+  theme     String   @default("light")
+  language  String   @default("en")
+  developmentMode Boolean @default(false)
+  enableSms Boolean @default(true)
+  notificationsEnabled Boolean @default(true)
+  lastSelectedContact Int? @unique
+  createdAt DateTime @default(now())
+}
