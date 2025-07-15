@@ -1,40 +1,33 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
+// app/api/send-message.ts (or app/actions.ts if you're using Server Actions)
+import { prisma } from "@/lib/prisma"
+import { sendSms } from "@/lib/sms"
 
-// This API route handles sending messages to a contact
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-    if (req.method === 'POST') {
-        
-        /* 
-        TODO:
-        if contact is not provided: 
-        1. create a new contact with the provided phone number and name as contact 
-        2. then send the message
+export async function sendMessage(contactId: number, content: string) {
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    include: {
+      messages: true,
+    },
+  })
 
-        */
-        const { contactId, content } = req.body
-    
-        if (!contactId || !content) {
-        return res.status(400).json({ error: 'Missing contactId or content' })
-        }
-    
-        try {
-        const message = await prisma.message.create({
-            data: {
-            content,
-            contactId,
-            direction: 'OUTGOING', // Assuming this is an outgoing message
-            },
-        })
-        return res.status(201).json(message)
-        } catch (error) {
-        console.error('Error creating message:', error)
-        return res.status(500).json({ error: 'Internal Server Error' })
-        }
-    }
-    
-    return res.status(405).end() // Method Not Allowed
+  if (!contact) throw new Error("Contact not found")
+
+  const settings = await prisma.userSettings.findFirst({
+    where: {},
+    orderBy: { id: "asc" }, // Replace with `userId` if your app supports auth
+  })
+
+  const message = await prisma.message.create({
+    data: {
+      content,
+      contactId,
+      direction: "OUTGOING", // Assuming this is an outgoing message
+    },
+  })
+
+  if (settings?.enableSms) {
+    await sendSms(contact.phone, content)
+  }
+
+  return message
 }
