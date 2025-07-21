@@ -39,12 +39,13 @@ model Message {
 
 model UserSettings {
   id        Int      @id @default(autoincrement())
-  name      String   @default("User")
+  name      String   @default("User Settings") // used as profile name
   theme     String   @default("light")
   language  String   @default("en")
-  developmentMode Boolean @default(false)
-  enableSms Boolean @default(true)
+  developmentMode     Boolean @default(false)
+  enableSms           Boolean @default(true)
   notificationsEnabled Boolean @default(true)
   lastSelectedContact Int? @unique
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
+

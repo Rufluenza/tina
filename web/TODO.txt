@@ -1,0 +1,12 @@
+Only show user settings list in user-settings-form-modal if there are 2 or more user settings
+
+
+SMS FUNCTIONS:
+When the computer is closed and an sms is received, it should be stored in the database.
+When the computer is opened, it should check for any new sms and store them in the database if they are not already present.
+
+When we receive an SMS, we should have a webhook to automatically store the SMS in the database.
+
+For debugging purposes, we should make my macbook go through the rpi for sms functionality
+
+

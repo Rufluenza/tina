@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import type { MessageDirection } from "@/lib/types"
+import { UserSettings } from "@/lib/types"
 
 export async function getContacts() {
   try {
@@ -74,20 +75,53 @@ export async function sendMessage(contactId: number, content: string, direction:
   }
 }
 
-export async function updateUserSettings(data: {
-  name: string
-  theme: string
-  language: string
-  developmentMode: boolean
-  enableSms: boolean
-  notificationsEnabled: boolean
-}) {
-  return prisma.userSettings.upsert({
-    where: { id: 1 }, // or use userId if you have auth
-    update: { ...data },
-    create: {
-      id: 1,
+
+
+
+export async function updateUserSettings(data: UserSettings, id: number) {
+  // Update the createdAt field to the current date
+  return prisma.userSettings.update({
+    where: { id },
+    data: {
       ...data,
+      createdAt: new Date(),
     },
+  })
+}
+
+export async function createUserSettings(data: Omit<UserSettings, "id" | "createdAt">) {
+  return prisma.userSettings.create({
+    data,
+  })
+}
+
+export async function deleteUserSettings(id: number) {
+  return prisma.userSettings.delete({
+    where: { id },
+  })
+}
+
+export async function getUserSettings() {
+  try {
+    const settings = await prisma.userSettings.findFirst({
+      where: {},
+      orderBy: { createdAt: "desc" }, // Get the most recent settings
+    })
+    return settings || null
+  } catch (error) {
+    console.error("Error fetching user settings:", error)
+    return null
+  }
+}
+
+export async function getUserSettingsList() {
+  return prisma.userSettings.findMany({
+    orderBy: { createdAt: "desc" },
+  })
+}
+
+export async function getUserSettingsById(id: number) {
+  return prisma.userSettings.findUnique({
+    where: { id },
   })
 }

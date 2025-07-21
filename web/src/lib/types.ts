@@ -19,18 +19,7 @@ export interface Message {
   createdAt: Date
 }
 
-/*
-UserSettings
-  id        Int      @id @default(autoincrement())
-  name      String   @default("User")
-  theme     String   @default("light")
-  language  String   @default("en")
-  developmentMode Boolean @default(false)
-  enableSms Boolean @default(true)
-  notificationsEnabled Boolean @default(true)
-  lastSelectedContact Int? @unique
-  createdAt DateTime @default(now())
-*/
+
 export interface UserSettings {
   id: number
   name: string
@@ -40,5 +29,4 @@ export interface UserSettings {
   enableSms: boolean
   notificationsEnabled: boolean
   lastSelectedContact?: number | null
-  createdAt: Date
 }

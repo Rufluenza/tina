@@ -157,6 +157,7 @@ export default function MessagesPage() {
         onClose={() => setIsUserSettingsOpen(false)}
         onSettingsUpdated={() => {
           // Optionally handle settings update
+          
           setIsUserSettingsOpen(false)
         }}
       />
