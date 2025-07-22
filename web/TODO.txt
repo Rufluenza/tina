@@ -9,4 +9,7 @@ When we receive an SMS, we should have a webhook to automatically store the SMS 
 
 For debugging purposes, we should make my macbook go through the rpi for sms functionality
 
-
+FIX:
+Message can start with this:
+AT+CMGF=1
+{then the correct message without brackets}

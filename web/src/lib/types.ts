@@ -7,8 +7,8 @@ export interface Contact {
   id: number
   phone: string
   name: string
-  messages: Message[]
-  createdAt: Date
+  messages?: Message[]
+  createdAt?: Date
 }
 
 export interface Message {

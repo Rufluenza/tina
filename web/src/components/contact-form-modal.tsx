@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { createContact } from "@/app/actions"
+import { useState, useEffect } from "react"
+import { createContact, getContactsClean, updateContact } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-
+import type { Contact } from "@/lib/types"
 interface ContactFormModalProps {
   isOpen: boolean
   onClose: () => void
@@ -19,6 +19,20 @@ export function ContactFormModal({ isOpen, onClose, onContactCreated }: ContactF
   const [phone, setPhone] = useState("")
   const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [existingContacts, setExistingContacts] = useState<Contact[]>([])
+
+  // Fetch existing contacts when the modal opens
+  useEffect(() => {
+    const fetchContacts = async () => {
+      const contacts = await getContactsClean()
+      setExistingContacts(contacts)
+    }
+
+    if (isOpen) {
+      fetchContacts()
+    }
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

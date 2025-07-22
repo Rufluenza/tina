@@ -1,6 +1,8 @@
 // app/api/send-message.ts (or app/actions.ts if you're using Server Actions)
 import { prisma } from "@/lib/prisma"
 import { sendSms } from "@/lib/sms"
+import { getUserSettingsList } from "@/app/actions"
+import { sendSMS } from "@/lib/sms-api"
 
 export async function sendMessage(contactId: number, content: string) {
   const contact = await prisma.contact.findUnique({
@@ -12,10 +14,11 @@ export async function sendMessage(contactId: number, content: string) {
 
   if (!contact) throw new Error("Contact not found")
 
-  const settings = await prisma.userSettings.findFirst({
-    where: {},
-    orderBy: { id: "asc" }, // Replace with `userId` if your app supports auth
-  })
+  
+  // Get the setting with the newest createdAt date
+  const settingsList = await getUserSettingsList()
+  if (!settingsList) throw new Error("User settings not found")
+  const settings = settingsList[0]
 
   const message = await prisma.message.create({
     data: {
@@ -25,9 +28,14 @@ export async function sendMessage(contactId: number, content: string) {
     },
   })
 
+  if (settings.enableSms) {
+    await sendSMS(contact.phone, content)
+  }
+  /*
   if (settings?.enableSms) {
     await sendSms(contact.phone, content)
   }
+    */
 
   return message
 }

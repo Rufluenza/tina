@@ -7,6 +7,7 @@ import { ContactSidebar } from "@/components/contact-sidebar"
 import { MessageBubble } from "@/components/message-bubble"
 import { MessageInput } from "@/components/message-input"
 import { ContactFormModal } from "@/components/contact-form-modal"
+import { EditContactModal } from "@/components/contact-edit-form-modal"
 import { UserSettingsModal } from "@/components/user-settings-form-modal"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -15,6 +16,7 @@ export default function MessagesPage() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isContactFormOpen, setIsContactFormOpen] = useState(false)
+  const [isEditContactOpen, setIsEditContactOpen] = useState(false)
   const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -119,6 +121,15 @@ export default function MessagesPage() {
               >
                 User Settings
               </Button>
+              {/* Edit Contact Button */}
+              <Button
+                onClick={() => setIsEditContactOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-gray-700"
+              >
+                Edit Contact
+              </Button>
             </div>
 
             {/* Messages */}
@@ -160,6 +171,12 @@ export default function MessagesPage() {
           
           setIsUserSettingsOpen(false)
         }}
+      />
+      {/* Edit Contact Modal */}
+      <EditContactModal
+        isOpen={isEditContactOpen}
+        onClose={() => setIsEditContactOpen(false)}
+        onContactUpdated={handleContactCreated}
       />
 
     </div>

@@ -42,9 +42,9 @@ class SMSHandler:
                 timestamp = parts[4].strip('"')
                 content = lines[i + 1].strip() if i + 1 < len(lines) else ""
                 msg = {
-                    "from": phone,
-                    "timestamp": timestamp,
-                    "message": content
+                    "phone": phone,
+                    "createdAt": timestamp,
+                    "content": content
                 }
                 messages.append(msg)
                 if self.callback:

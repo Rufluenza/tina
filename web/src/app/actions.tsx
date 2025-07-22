@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import type { MessageDirection } from "@/lib/types"
 import { UserSettings } from "@/lib/types"
+import { sendSMS } from "@/lib/sms-api"
 
 export async function getContacts() {
   try {
@@ -14,6 +15,20 @@ export async function getContacts() {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+    return contacts
+  } catch (error) {
+    console.error("Error fetching contacts:", error)
+    return []
+  }
+}
+
+export async function getContactsClean() {
+  try {
+    const contacts = await prisma.contact.findMany({
       orderBy: {
         createdAt: "desc",
       },
@@ -59,6 +74,25 @@ export async function createContact(phone: string, name: string) {
   }
 }
 
+export async function updateContact(id: number, data: { name: string; phone: string }) {
+  return prisma.contact.update({
+    where: { id },
+    data,
+  })
+}
+
+export async function deleteContact(id: number) {
+  try {
+    const contact = await prisma.contact.delete({
+      where: { id },
+    })
+    return contact
+  } catch (error) {
+    console.error("Error deleting contact:", error)
+    return null
+  }
+}
+
 export async function sendMessage(contactId: number, content: string, direction: MessageDirection) {
   try {
     const message = await prisma.message.create({
@@ -68,6 +102,15 @@ export async function sendMessage(contactId: number, content: string, direction:
         direction,
       },
     })
+    // send sms using sendSMS function
+    // First get the phone number of the contact
+    const contact = await prisma.contact.findUnique({
+      where: { id: contactId },
+    })
+    if (!contact) {
+      throw new Error("Contact not found")
+    }
+    await sendSMS(contact.phone, content)
     return message
   } catch (error) {
     console.error("Error sending message:", error)
@@ -75,8 +118,21 @@ export async function sendMessage(contactId: number, content: string, direction:
   }
 }
 
-
-
+export async function receiveMessage(contactId: number, content: string) {
+  try {
+    const message = await prisma.message.create({
+      data: {
+        content,
+        contactId,
+        direction: "INCOMING",
+      },
+    })
+    return message
+  } catch (error) {
+    console.error("Error receiving message:", error)
+    return null
+  }
+}
 
 export async function updateUserSettings(data: UserSettings, id: number) {
   // Update the createdAt field to the current date
