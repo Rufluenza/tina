@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { getContacts, getContactWithMessages } from "@/app/actions"
 import type { Contact } from "@/lib/types"
 import { ContactSidebar } from "@/components/contact-sidebar"
@@ -12,6 +12,8 @@ import { UserSettingsModal } from "@/components/user-settings-form-modal"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
+
+
 export default function MessagesPage() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -19,31 +21,27 @@ export default function MessagesPage() {
   const [isEditContactOpen, setIsEditContactOpen] = useState(false)
   const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollToBottom = (smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" })
+  }
+
+
 
   const loadContacts = async () => {
     setIsLoading(true)
     const fetchedContacts = await getContacts()
     setContacts(fetchedContacts)
-    /*
-    if (fetchedContacts instanceof Response) {
-      // If fetchedContacts is a Response object, parse it as JSON
-      const data = await fetchedContacts.json()
-      setContacts(data)
-    }
-    */
-    // Why do i get error when trying to parse fetchedContacts?
-    // if (fetchedContacts instanceof Response) {
-    //   const data = await fetchedContacts.json()
-    //   setContacts(data)
-    // } else {
-    //   setContacts(fetchedContacts)
-    // }
-    // If no contacts exist, open the contact form
+    
 
     if (fetchedContacts.length === 0) {
       setIsContactFormOpen(true)
     } else if (!selectedContact) { // TODO: MAKE DEFAULT SELECTED CONTACT THE LAST ONE
+      // TODO: Get the contact with the most recent messages that are outgoing
+
       setSelectedContact(fetchedContacts[0])
+      //scrollToBottom()
 
     }
     setIsLoading(false)
@@ -53,12 +51,41 @@ export default function MessagesPage() {
     const contact = await getContactWithMessages(contactId)
     if (contact) {
       setSelectedContact(contact)
+      scrollToBottom()
     }
   }
 
+
   useEffect(() => {
     loadContacts()
+
+    const socket = new WebSocket(`ws://localhost:3000`)
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+
+      if (data.type === "new-message") {
+        setSelectedContact((prev) => {
+          if (prev?.id === data.contactId) {
+            loadSelectedContact(data.contactId)
+          }
+          return prev
+        })
+      }
+    }
+
+    return () => {
+      socket.close()
+    }
   }, [])
+
+
+
+  useEffect(() => {
+    scrollToBottom(false)
+  }, [selectedContact?.messages])
+
+  
 
   const handleSelectContact = (contactId: number) => {
     loadSelectedContact(contactId)
@@ -134,10 +161,12 @@ export default function MessagesPage() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {selectedContact.messages.map((message) => (
+              {selectedContact.messages?.map((message) => (
                 <MessageBubble key={message.id} message={message} />
               ))}
+              <div ref={messagesEndRef} />
             </div>
+
 
             {/* Message Input */}
             <MessageInput contactId={selectedContact.id} onMessageSent={handleMessageSent} />

@@ -15,7 +15,7 @@ export interface Message {
   id: number
   content: string
   contactId: number
-  direction: MessageDirection
+  direction: string // MessageDirection
   createdAt: Date
 }
 

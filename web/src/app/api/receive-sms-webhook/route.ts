@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { receiveMessage } from "@/app/actions"
+import { sendToClient } from "@/lib/websocket-server"
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,16 +21,16 @@ export async function POST(req: NextRequest) {
       },
     })
     // Store to database or state here
-    
-    const message = await prisma.message.create({
-      data: {
-        content: body.message,
-        contactId: contact.id, // Use the contact ID
-        direction: "INCOMING", // Assuming this is an incoming message
-      },
+    await receiveMessage(contact.id, body.content)
+
+    sendToClient({
+      type: "new-message",
+      contactId: contact.id,
+      content: body.content,
+      phone: body.phone,
     })
 
-    return NextResponse.json({ success: true, message, contact }, { status: 200 })
+    return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {
     console.error("[Webhook Error]", error)
     return NextResponse.json({ error: "Failed to handle webhook" }, { status: 500 })

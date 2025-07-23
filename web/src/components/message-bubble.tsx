@@ -5,8 +5,10 @@ interface MessageBubbleProps {
   message: Message
 }
 
+
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isOutgoing = message.direction === MessageDirection.OUTGOING
+  
 
   return (
     <div className={`flex mb-2 ${isOutgoing ? "justify-end" : "justify-start"}`}>
