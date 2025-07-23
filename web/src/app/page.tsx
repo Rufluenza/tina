@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getContacts, getContactWithMessages } from "@/app/actions"
+import { getContacts, getContactWithMessages, getUserSettings } from "@/app/actions"
 import type { Contact } from "@/lib/types"
 import { ContactSidebar } from "@/components/contact-sidebar"
 import { MessageBubble } from "@/components/message-bubble"
@@ -11,6 +11,8 @@ import { EditContactModal } from "@/components/contact-edit-form-modal"
 import { UserSettingsModal } from "@/components/user-settings-form-modal"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+//import { WebSocket } from "ws" // Ensure you have ws installed if using Node.js
+import Keyboard from "@/components/keyboard"
 
 
 
@@ -22,7 +24,19 @@ export default function MessagesPage() {
   const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
+  const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
+  const [typedMessage, setTypedMessage] = useState("")
+  // Load user settings on mount
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      const settings = await getUserSettings()
+      setCurrentUserSettings(settings)
+      setIsKeyboardEnabled(settings?.developmentMode || false) // Example condition
+    }
 
+    loadUserSettings()
+  }, [])
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" })
   }
@@ -55,29 +69,60 @@ export default function MessagesPage() {
     }
   }
 
-
   useEffect(() => {
     loadContacts()
+    try {
+      // ✨ CHANGE: Point to your new WebSocket server port
+      const socket = new WebSocket(`ws://localhost:3001`)
 
-    const socket = new WebSocket(`ws://localhost:3000`)
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data)
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-
-      if (data.type === "new-message") {
-        setSelectedContact((prev) => {
-          if (prev?.id === data.contactId) {
-            loadSelectedContact(data.contactId)
-          }
-          return prev
-        })
+        if (data.type === "new-message") {
+          setSelectedContact((prev) => {
+            if (prev?.id === data.contactId) {
+              
+              loadSelectedContact(data.contactId)
+            }
+            return prev
+          })
+        }
       }
-    }
 
-    return () => {
-      socket.close()
+      return () => {
+        socket.close()
+      }
+    } catch (error) {
+      console.error("WebSocket connection error:", error)
+    }
+  }, []) // This effect should run only once on mount
+  /*
+  useEffect(() => {
+    loadContacts()
+    try {
+      const socket = new WebSocket(`ws://localhost:3000`)
+      
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+
+        if (data.type === "new-message") {
+          setSelectedContact((prev) => {
+            if (prev?.id === data.contactId) {
+              loadSelectedContact(data.contactId)
+            }
+            return prev
+          })
+        }
+      }
+
+      return () => {
+        socket.close()
+      }
+    } catch (error) {
+      console.error("WebSocket connection error:", error)
     }
   }, [])
+  */
 
 
 
@@ -169,7 +214,9 @@ export default function MessagesPage() {
 
 
             {/* Message Input */}
-            <MessageInput contactId={selectedContact.id} onMessageSent={handleMessageSent} />
+            <MessageInput contactId={selectedContact.id} onMessageSent={handleMessageSent} typedMessage={typedMessage} setTypedMessage={setTypedMessage} />
+            {/* Keyboard Component if user has developer mode enabled */}
+            { isKeyboardEnabled && (<Keyboard typedMessage={typedMessage} setTypedMessage={setTypedMessage} />)}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { sendMessage } from "@/app/actions"
 import { MessageDirection } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -12,11 +12,22 @@ import { Send } from "lucide-react"
 interface MessageInputProps {
   contactId: number
   onMessageSent: () => void
+  typedMessage?: string
+  setTypedMessage?: (message: string) => void
 }
 
-export function MessageInput({ contactId, onMessageSent }: MessageInputProps) {
+export function MessageInput({ contactId, onMessageSent, typedMessage, setTypedMessage }: MessageInputProps) {
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // If typedMessage is provided, make message reflect it
+  useEffect(() => {
+    if (typedMessage !== undefined) {
+      
+
+      setMessage(typedMessage)
+    }
+  }, [typedMessage])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

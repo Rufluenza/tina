@@ -6,5 +6,6 @@ npx prisma migrate dev --name init
 Add a field e.g `direction` to the `Message` model in the Prisma schema:
 npx prisma migrate dev --name add-message-direction
 
-
+Run websocket:
+npx tsx src/lib/websocket-server.ts
 

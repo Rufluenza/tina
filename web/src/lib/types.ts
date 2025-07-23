@@ -30,3 +30,8 @@ export interface UserSettings {
   notificationsEnabled: boolean
   lastSelectedContact?: number | null
 }
+
+export interface KeyboardProps {
+  typedMessage: string
+  setTypedMessage: (message: string) => void
+}

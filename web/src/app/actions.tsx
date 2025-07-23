@@ -170,6 +170,8 @@ export async function getUserSettings() {
   }
 }
 
+
+
 export async function getUserSettingsList() {
   return prisma.userSettings.findMany({
     orderBy: { createdAt: "desc" },
