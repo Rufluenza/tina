@@ -134,10 +134,10 @@ export async function receiveMessage(contactId: number, content: string) {
   }
 }
 
-export async function updateUserSettings(data: UserSettings, id: number) {
+export async function updateUserSettings(data: UserSettings, id?: number) {
   // Update the createdAt field to the current date
   return prisma.userSettings.update({
-    where: { id },
+    where: { id: id || data.id },
     data: {
       ...data,
       createdAt: new Date(),

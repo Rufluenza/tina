@@ -15,15 +15,13 @@ import {
   deleteUserSettings
 } from "@/app/actions"
 
-interface UserSettings {
-  id: number
-  name: string
-  theme: string
-  language: string
-  developmentMode: boolean
-  enableSms: boolean
-  notificationsEnabled: boolean
+import type { UserSettings } from "@/lib/types"
+
+interface UserSettingsFormProps {
+  settings: UserSettings
+  onChange: (settings: UserSettings) => void
 }
+
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -143,7 +141,7 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
         </DialogHeader>
         <form onSubmit={handleApply} className="space-y-4">
           { /* If there are existing profiles, don't show the select dropdown */ }
-          {existingProfiles.length > 0 && (
+          {existingProfiles.length > 1 && (
             <div>
               <Label htmlFor="existing-settings">Select Profile</Label>
               <select
@@ -219,6 +217,25 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
               id="notifications"
               checked={form.notificationsEnabled}
               onCheckedChange={(val) => handleChange("notificationsEnabled", val)}
+            />
+          </div>
+          { /* Add Virtual Keyboard Switch & size multiplier */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="virtual-keyboard">Enable Virtual Keyboard</Label>
+            <Switch
+              id="virtual-keyboard"
+              checked={form.enableVirtualKeyboard || false}
+              onCheckedChange={(val) => handleChange("enableVirtualKeyboard", val)}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="size-multiplier">Size Multiplier</Label>
+            <Input
+              id="size-multiplier"
+              type="number"
+              value={form.sizeMultiplier || 1}
+              onChange={(e) => handleChange("sizeMultiplier", parseFloat(e.target.value))}
+              className="bg-[#3b3b3d] border-gray-600 text-white w-24"
             />
           </div>
 

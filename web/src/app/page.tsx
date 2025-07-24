@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { getContacts, getContactWithMessages, getUserSettings } from "@/app/actions"
 import type { Contact } from "@/lib/types"
+import { useSettings } from "@/contexts/settings-context"
 import { ContactSidebar } from "@/components/contact-sidebar"
 import { MessageBubble } from "@/components/message-bubble"
 import { MessageInput } from "@/components/message-input"
@@ -16,6 +17,7 @@ import Keyboard from "@/components/keyboard"
 
 
 
+
 export default function MessagesPage() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -23,6 +25,8 @@ export default function MessagesPage() {
   const [isEditContactOpen, setIsEditContactOpen] = useState(false)
   const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const { settings, isLoading: isLoadingSettings } = useSettings() // Assuming you have a SettingsContext
+  
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
@@ -32,7 +36,7 @@ export default function MessagesPage() {
     const loadUserSettings = async () => {
       const settings = await getUserSettings()
       setCurrentUserSettings(settings)
-      setIsKeyboardEnabled(settings?.developmentMode || false) // Example condition
+      setIsKeyboardEnabled(settings?.enableVirtualKeyboard || false) // Example condition
     }
 
     loadUserSettings()
@@ -123,8 +127,6 @@ export default function MessagesPage() {
     }
   }, [])
   */
-
-
 
   useEffect(() => {
     scrollToBottom(false)
