@@ -25,7 +25,7 @@ export default function MessagesPage() {
   const [isEditContactOpen, setIsEditContactOpen] = useState(false)
   const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const { settings, isLoading: isLoadingSettings } = useSettings() // Assuming you have a SettingsContext
+  //const { settings, isLoading: isLoadingSettings } = useSettings() // Assuming you have a SettingsContext
   
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
