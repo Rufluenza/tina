@@ -15,7 +15,6 @@ curl -X POST http://<pi-ip>:8000/send \
 receive SMS:
 curl http://<pi-ip>:8000/receive
 """
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sms import SMSHandler
@@ -34,7 +33,6 @@ class SMSRequest(BaseModel):
 def send_sms(request: SMSRequest):
     try:
         result = sms.send_sms(request.phone, request.message)
-        print("SMS sent:", result)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -42,10 +40,10 @@ def send_sms(request: SMSRequest):
 # While keeping the /receive endpoint for reading SMS messages?
 # so it can be used interchangeably
 @app.get("/receive")
+@app.get("/read")
 def receive_sms():
     try:
         messages = sms.read_sms()
-        print("Received messages:", messages)
         return {"messages": messages}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
