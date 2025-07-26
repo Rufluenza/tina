@@ -7,62 +7,65 @@ SERIAL_PORT = "/dev/serial0"
 BAUD_RATE = 9600
 
 class SMSHandler:
-    def __init__(self, port=SERIAL_PORT, baud=BAUD_RATE):
+    def __init__(self, port=SERIAL_PORT, baud=BAUD_RATE, init_timeout=60):
         self.ser = serial.Serial(port, baud, timeout=1)
         self._lock = threading.Lock()
         self.callback: Optional[Callable[[dict], None]] = None
-        self._initialize_modem()
+        self._initialize_modem(init_timeout)
 
-    def _initialize_modem(self):
+    def _initialize_modem(self, timeout: int):
         """
         Waits for the modem to be fully ready before proceeding.
+        Raises TimeoutError if it fails to initialize within the timeout period.
         """
         print("Initializing GSM module...")
+        start_time = time.time()
+
+        def check_timeout():
+            if time.time() - start_time > timeout:
+                raise TimeoutError("GSM module initialization failed. Check antenna, SIM, and power.")
+            return False
+
         with self._lock:
-            # Wait for the modem to be ready
-            while True:
+            # Step 1: Wait for the modem to be responsive
+            while not check_timeout():
                 self.ser.write(b"AT\r")
-                response = self.ser.read(100).decode(errors='ignore')
-                if "OK" in response:
+                if "OK" in self.ser.read(100).decode(errors='ignore'):
                     print("Modem is responsive.")
                     break
                 print("Waiting for modem to respond...")
-                time.sleep(1)
+                time.sleep(2)
 
-            # Disable command echo
-            self.ser.write(b"ATE0\r")
-            time.sleep(0.5)
+            # Step 2: Disable command echo
+            self._send_at_command("ATE0")
             
-            # Wait for SIM to be ready
-            while True:
-                self.ser.write(b"AT+CPIN?\r")
-                response = self.ser.read(100).decode(errors='ignore')
-                if "+CPIN: READY" in response:
+            # Step 3: Wait for SIM to be ready
+            while not check_timeout():
+                response_lines = self._send_at_command("AT+CPIN?")
+                if response_lines and "+CPIN: READY" in response_lines[0]:
                     print("SIM card is ready.")
                     break
                 print("Waiting for SIM card...")
-                time.sleep(1)
+                time.sleep(2)
             
-            # Wait for network registration
-            while True:
-                self.ser.write(b"AT+CREG?\r")
-                response = self.ser.read(100).decode(errors='ignore')
-                if "+CREG: 0,1" in response or "+CREG: 0,5" in response:
-                    print("Registered on network.")
-                    break
+            # Step 4: Wait for network registration
+            while not check_timeout():
+                response_lines = self._send_at_command("AT+CREG?")
+                if response_lines:
+                    # Response can be "+CREG: 0,1" (home) or "+CREG: 0,5" (roaming)
+                    if "+CREG: 0,1" in response_lines[0] or "+CREG: 0,5" in response_lines[0]:
+                        print("Registered on network.")
+                        break
                 print("Waiting for network registration...")
-                time.sleep(1)
+                time.sleep(2)
 
-            # Set to text mode
-            self.ser.write(b"AT+CMGF=1\r")
-            time.sleep(0.5)
+            # Step 5: Final configuration
+            self._send_at_command("AT+CMGF=1") # Set to text mode
             self.ser.reset_input_buffer()
+
         print("GSM module initialized successfully.")
 
     def _send_at_command(self, command: str, timeout: float = 5.0):
-        """
-        Sends a command and reads the response until a final "OK" or "ERROR".
-        """
         with self._lock:
             self.ser.reset_input_buffer()
             print(f"Sending command: {command}")
@@ -77,27 +80,24 @@ class SMSHandler:
                         return lines
                     if "ERROR" in line:
                         print(f"Command failed with error: {line}")
-                        return None # Indicate failure
-                    if line != command: # Filter out the command echo if it's still on
+                        return None
+                    if line != command:
                         lines.append(line)
             print("Warning: Command timed out.")
             return None
 
     def send_sms(self, phone_number: str, message: str):
-        """Sends an SMS message."""
-        # The ">" character is the prompt for the message content
         self._send_at_command(f'AT+CMGS="{phone_number}"')
         
         with self._lock:
             print(f"Sending message content to {phone_number}...")
-            self.ser.write(message.encode() + b"\x1A") # Ctrl+Z to send
+            self.ser.write(message.encode() + b"\x1A")
         
-        # Wait for the final confirmation from the modem
         start_time = time.time()
-        while time.time() - start_time < 20: # SMS sending can take time
+        while time.time() - start_time < 20:
              response = self.ser.read(100).decode('utf-8', errors='ignore').strip()
              if "+CMGS:" in response:
-                 print(f"SMS sent successfully.")
+                 print("SMS sent successfully.")
                  return {"status": "sent", "to": phone_number, "message": message}
              if "ERROR" in response:
                  print("Failed to send SMS.")
@@ -105,7 +105,6 @@ class SMSHandler:
         return {"status": "failed", "to": phone_number, "reason": "No confirmation from modem"}
 
     def read_and_process_sms(self):
-        """Reads all SMS, processes unread ones, and deletes all of them."""
         print("Checking for new messages...")
         response_lines = self._send_at_command('AT+CMGL="ALL"')
 
@@ -119,9 +118,7 @@ class SMSHandler:
             if line.startswith("+CMGL:"):
                 try:
                     parts = line.split(",")
-                    index = parts[0].split(":")[1].strip()
-                    status = parts[1].strip('"')
-                    phone = parts[2].strip('"')
+                    index, status, phone = parts[0].split(":")[1].strip(), parts[1].strip('"'), parts[2].strip('"')
                     content = response_lines[i + 1]
                     
                     print(f"Found message at index {index} from {phone} with status '{status}'")
@@ -142,7 +139,6 @@ class SMSHandler:
         self.callback = callback_fn
 
     def start_receiver_thread(self, interval: float = 10.0):
-        """Starts a background thread to periodically check for new messages."""
         def _loop():
             while True:
                 try:
