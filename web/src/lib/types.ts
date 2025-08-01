@@ -28,9 +28,9 @@ export interface UserSettings {
   developmentMode: boolean
   enableSms: boolean
   notificationsEnabled: boolean
-  lastSelectedContact?: number | null
-  sizeMultiplier?: number
-  enableVirtualKeyboard?: boolean
+  lastSelectedContact: number
+  sizeMultiplier: number
+  enableVirtualKeyboard: boolean
 }
 
 export interface KeyboardProps {

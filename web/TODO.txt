@@ -13,3 +13,5 @@ FIX:
 Message can start with this:
 AT+CMGF=1
 {then the correct message without brackets}
+
+PROPPER POWER TO GSM MODULE:

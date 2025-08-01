@@ -45,9 +45,9 @@ model UserSettings {
   developmentMode     Boolean @default(false)
   enableSms           Boolean @default(true)
   notificationsEnabled Boolean @default(true)
-  lastSelectedContact Int? @unique
-  sizeMultiplier Int? @default(1)
-  enableVirtualKeyboard Boolean? @default(false)
+  lastSelectedContact Int @unique
+  sizeMultiplier Int @default(1)
+  enableVirtualKeyboard Boolean @default(false)
   createdAt DateTime  @default(now())
 }
 

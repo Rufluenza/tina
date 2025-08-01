@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getContacts, getContactWithMessages, getUserSettings } from "@/app/actions"
+import { getContacts, getContactWithMessages, getUserSettings, updateLastSelectedContact, getContactById } from "@/app/actions"
 import type { Contact } from "@/lib/types"
 import { useSettings } from "@/contexts/settings-context"
 import { ContactSidebar } from "@/components/contact-sidebar"
@@ -31,6 +31,7 @@ export default function MessagesPage() {
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
   const [typedMessage, setTypedMessage] = useState("")
+  const [showSidebar, setShowSidebar] = useState(true)
   // Load user settings on mount
   useEffect(() => {
     const loadUserSettings = async () => {
@@ -57,8 +58,25 @@ export default function MessagesPage() {
       setIsContactFormOpen(true)
     } else if (!selectedContact) { // TODO: MAKE DEFAULT SELECTED CONTACT THE LAST ONE
       // TODO: Get the contact with the most recent messages that are outgoing
+      // this is an id and should be the contact that is referenced
+      
+      if (currentUserSettings?.lastSelectedContact) {
+        const contact = await getContactById(currentUserSettings?.lastSelectedContact)
+        if (contact) {
+          setSelectedContact(contact)
+        } else {
+          setSelectedContact(fetchedContacts[0])
+        }
+      } else {
+        const contact = await getContactById(currentUserSettings?.lastSelectedContact)
+        console.log("Contact fetched by ID:", contact)
+        // how can i make sure it uses the number?
 
-      setSelectedContact(fetchedContacts[0])
+        setSelectedContact(contact)
+      }
+
+
+      //setSelectedContact(fetchedContacts[0])
       //scrollToBottom()
 
     }
@@ -134,8 +152,15 @@ export default function MessagesPage() {
 
   
 
-  const handleSelectContact = (contactId: number) => {
+  const handleSelectContact = async (contactId: number) => {
+    
+    await updateLastSelectedContact(contactId) // Update last selected contact in user settings
+    
+    
+    console.log("Selected contact ID:", currentUserSettings?.lastSelectedContact)
     loadSelectedContact(contactId)
+    
+    //setSelectedContact(contacts.find(contact => contact.id === contactId) || null)
   }
 
   const handleContactCreated = () => {
@@ -148,6 +173,8 @@ export default function MessagesPage() {
     }
   }
 
+  
+
   if (isLoading) {
     return (
       <div className="h-screen bg-[#1e1e1e] flex items-center justify-center">
@@ -158,12 +185,16 @@ export default function MessagesPage() {
 
   return (
     <div className="h-screen bg-[#1e1e1e] flex">
+      {/* open / close sidebar button */}
+
       {/* Sidebar */}
-      <ContactSidebar
+      { showSidebar && (
+        <ContactSidebar
         contacts={contacts}
         selectedContactId={selectedContact?.id || null}
         onSelectContact={handleSelectContact}
-      />
+        />
+      )}
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
@@ -177,6 +208,16 @@ export default function MessagesPage() {
                   <p className="text-sm text-gray-400">{selectedContact.phone}</p>
                 )}
               </div>
+              {/* Toggle Sidebar Button */}
+              <Button
+                onClick={() => setShowSidebar(!showSidebar)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-gray-700"
+              >
+                {showSidebar ? "Hide Sidebar" : "Show Sidebar"}
+              </Button>
+              {/* New Contact Button */}
               <Button
                 onClick={() => setIsContactFormOpen(true)}
                 variant="outline"
@@ -233,6 +274,7 @@ export default function MessagesPage() {
         )}
         
       </div>
+      
 
       {/* Contact Form Modal */}
       <ContactFormModal

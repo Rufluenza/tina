@@ -32,7 +32,9 @@ class SMSRequest(BaseModel):
 @app.post("/send")
 def send_sms(request: SMSRequest):
     try:
+        print(f"Sending SMS to {request.phone}: {request.message}")
         result = sms.send_sms(request.phone, request.message)
+        print(f"SMS sent successfully: {result}")
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -40,7 +42,6 @@ def send_sms(request: SMSRequest):
 # While keeping the /receive endpoint for reading SMS messages?
 # so it can be used interchangeably
 @app.get("/receive")
-@app.get("/read")
 def receive_sms():
     try:
         messages = sms.read_sms()

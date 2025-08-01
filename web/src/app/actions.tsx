@@ -26,6 +26,40 @@ export async function getContacts() {
   }
 }
 
+export async function updateLastSelectedContact(contactId: number) {
+  try {
+    const settings = await getUserSettings()
+    if (settings) {
+      await prisma.userSettings.update({
+        where: { id: settings.id },
+        data: { lastSelectedContact: contactId },
+      })
+      
+    }
+  } catch (error) {
+    console.error("Error updating last selected contact:", error)
+  }
+}
+
+export async function getContactById(contactId: number) {
+  try {
+    const contact = await prisma.contact.findFirst({
+      where: { id: contactId },
+      include: {
+        messages: {
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
+    })
+    return contact
+  } catch (error) {
+    console.error("Error fetching contact by ID:", error)
+    return null
+  }
+}
+
 export async function getContactsClean() {
   try {
     const contacts = await prisma.contact.findMany({

@@ -1,5 +1,5 @@
 import requests
-WEBHOOK_URL = "http://192.168.1.20:3000/api/receive-sms-webhook"
+WEBHOOK_URL = "http://192.168.1.191:3000/api/receive-sms-webhook"
 
 def notify_webhook(message_data: dict):
     try:
