@@ -45,12 +45,20 @@ class SMSHandler:
         time.sleep(3)
         return {"status": "sent", "to": phone_number, "message": message}
     """
-
+    """
     def read_sms(self):
         self._send_at_command("AT+CMGF=1")
         self._send_at_command('AT+CMGL="REC UNREAD"')  # Only unread messages
         raw_data = self.ser.read(self.ser.in_waiting or 1).decode(errors="ignore")
-
+        
+        return self._parse_sms(raw_data)
+    """
+    def read_sms(self):
+        self._send_at_command("AT")
+        self._send_at_command('AT+CSCS="UCS2"')
+        self._send_at_command("AT+CMGF=1")
+        self._send_at_command('AT+CMGL="REC UNREAD"')
+        raw_data = self.ser.read(self.ser.in_waiting or 1).decode(errors="ignore")
         return self._parse_sms(raw_data)
 
     def _parse_sms(self, raw: str):
