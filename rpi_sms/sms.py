@@ -69,13 +69,16 @@ class SMSHandler:
             line = lines[i].strip()
             if line.startswith("+CMGL:"):
                 parts = line.split(",")
-                phone = parts[2].strip('"')
+                #phone = parts[2].strip('"')
+                raw_phone = parts[2].strip('"')
                 timestamp = parts[4].strip('"')
                 #content = lines[i + 1].strip() if i + 1 < len(lines) else ""
                 raw_content = lines[i + 1].strip() if i + 1 < len(lines) else ""
                 try:
+                    phone = bytes.fromhex(raw_phone).decode("utf-16-be")
                     content = bytes.fromhex(raw_content).decode("utf-16-be")
                 except Exception:
+                    phone = raw_phone
                     content = raw_content  # fallback
 
                 msg = {
