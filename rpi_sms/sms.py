@@ -20,12 +20,31 @@ class SMSHandler:
         return ''.join(f'{ord(c):04X}' for c in text)
 
     def send_sms(self, phone_number: str, message: str):
+        def text_to_ucs2(text: str):
+            return ''.join(f'{ord(c):04X}' for c in text)
+
+        self._send_at_command("AT")
+        self._send_at_command('AT+CSCS="UCS2"')     # Set character set to UCS2
+        self._send_at_command("AT+CMGF=1")          # Set SMS text mode
+
+        ucs2_number = text_to_ucs2(phone_number)
+        ucs2_message = text_to_ucs2(message)
+
+        self._send_at_command(f'AT+CMGS="{ucs2_number}"', delay=0.5)
+        self.ser.write(ucs2_message.encode() + b"\x1A")
+        time.sleep(3)
+
+        return {"status": "sent", "to": phone_number, "message": message}
+
+    """
+    def send_sms(self, phone_number: str, message: str):
         self._send_at_command("AT")
         self._send_at_command("AT+CMGF=1")  # Set text mode
         self._send_at_command(f'AT+CMGS="{phone_number}"')
         self.ser.write(message.encode() + b"\x1A")
         time.sleep(3)
         return {"status": "sent", "to": phone_number, "message": message}
+    """
 
     def read_sms(self):
         self._send_at_command("AT+CMGF=1")
