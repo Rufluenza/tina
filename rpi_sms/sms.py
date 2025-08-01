@@ -50,6 +50,7 @@ class SMSHandler:
         self._send_at_command("AT+CMGF=1")
         self._send_at_command('AT+CMGL="REC UNREAD"')  # Only unread messages
         raw_data = self.ser.read(self.ser.in_waiting or 1).decode(errors="ignore")
+
         return self._parse_sms(raw_data)
 
     def _parse_sms(self, raw: str):
@@ -62,7 +63,13 @@ class SMSHandler:
                 parts = line.split(",")
                 phone = parts[2].strip('"')
                 timestamp = parts[4].strip('"')
-                content = lines[i + 1].strip() if i + 1 < len(lines) else ""
+                #content = lines[i + 1].strip() if i + 1 < len(lines) else ""
+                raw_content = lines[i + 1].strip() if i + 1 < len(lines) else ""
+                try:
+                    content = bytes.fromhex(raw_content).decode("utf-16-be")
+                except Exception:
+                    content = raw_content  # fallback
+
                 msg = {
                     "phone": phone,
                     "createdAt": timestamp,
