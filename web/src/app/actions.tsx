@@ -108,6 +108,19 @@ export async function createContact(phone: string, name: string) {
   }
 }
 
+export async function updateContactLastVisited(id: number) {
+  try {
+    const contact = await prisma.contact.update({
+      where: { id },
+      data: { lastVisited: new Date() },
+    })
+    return contact
+  } catch (error) {
+    console.error("Error updating contact last visited:", error)
+    return null
+  }
+}
+
 export async function updateContact(id: number, data: { name: string; phone: string }) {
   return prisma.contact.update({
     where: { id },
@@ -117,7 +130,11 @@ export async function updateContact(id: number, data: { name: string; phone: str
 
 export async function deleteContact(id: number) {
   try {
-    const contact = await prisma.contact.delete({
+    // First delete all messages associated with the contact
+    await prisma.message.deleteMany({
+      where: { contactId: id },
+    })
+    const contact = await prisma.contact.deleteMany({
       where: { id },
     })
     return contact

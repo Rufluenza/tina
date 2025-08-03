@@ -1,7 +1,23 @@
+import { $Enums, NavigationMode as NavigationModeEnum, UserSettings as PrismaUserSettings } from "@prisma/client"
+
+export type NavigationMode = $Enums.NavigationMode
+export const NavigationMode = NavigationModeEnum
+
+export type UserSettings = PrismaUserSettings
+
+
+
 export enum MessageDirection {
   INCOMING = "INCOMING",
   OUTGOING = "OUTGOING",
 }
+/*
+export enum NavigationMode {
+  DEFAULT = "DEFAULT",
+  MOUSE = "MOUSE",
+  ARROW_KEYS = "ARROW_KEYS"
+}
+  */
 
 export interface Contact {
   id: number
@@ -9,6 +25,7 @@ export interface Contact {
   name: string
   messages?: Message[]
   createdAt?: Date
+  lastVisited?: Date
 }
 
 export interface Message {
@@ -19,7 +36,7 @@ export interface Message {
   createdAt: Date
 }
 
-
+/*
 export interface UserSettings {
   id: number
   name: string
@@ -28,12 +45,15 @@ export interface UserSettings {
   developmentMode: boolean
   enableSms: boolean
   notificationsEnabled: boolean
-  lastSelectedContact: number
+  lastSelectedContact: number | null
   sizeMultiplier: number
   enableVirtualKeyboard: boolean
+  navigationMode: NavigationMode // NavigationMode
+  createdAt: Date
 }
-
+*/
 export interface KeyboardProps {
   typedMessage: string
-  setTypedMessage: (message: string) => void
+  setTypedMessage: React.Dispatch<React.SetStateAction<string>>
+  //setTypedMessage: (message: string) => void
 }

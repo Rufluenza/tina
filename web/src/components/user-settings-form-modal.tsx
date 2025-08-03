@@ -16,6 +16,8 @@ import {
 } from "@/app/actions"
 
 import type { UserSettings } from "@/lib/types"
+import { NavigationMode } from "@/lib/types"
+
 
 interface UserSettingsFormProps {
   settings: UserSettings
@@ -26,19 +28,24 @@ interface UserSettingsFormProps {
 interface UserSettingsModalProps {
   isOpen: boolean
   onClose: () => void
-  onSettingsUpdated?: () => void
+  onSettingsUpdated?: (newSettings?: any) => void
   settings?: UserSettings
 }
 
-export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsModalProps) {
+export function UserSettingsModal({ isOpen, onClose, settings, onSettingsUpdated }: UserSettingsModalProps) {
   const [form, setForm] = useState<UserSettings>({
     id: 0,
     name: settings?.name || "",
     theme: settings?.theme || "light",
     language: settings?.language || "en",
     developmentMode: settings?.developmentMode || false,
-    enableSms: settings?.enableSms ?? true,
-    notificationsEnabled: settings?.notificationsEnabled ?? true,
+    enableSms: settings?.enableSms || true,
+    notificationsEnabled: settings?.notificationsEnabled || true,
+    enableVirtualKeyboard: settings?.enableVirtualKeyboard || false,
+    sizeMultiplier: settings?.sizeMultiplier || 1,
+    navigationMode: settings?.navigationMode || NavigationMode.DEFAULT,
+    createdAt: settings?.createdAt || new Date(),
+    lastSelectedContact: settings?.lastSelectedContact || null,
   })
 
   const [existingProfiles, setExistingProfiles] = useState<UserSettings[]>([])
@@ -54,8 +61,12 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
     if (!selectedId) return
     setIsLoading(true)
     try {
-      await updateUserSettings(form, form.id) // pass current ID
+      const updatedSettings = await updateUserSettings(form, form.id) // pass current ID
+      if (onSettingsUpdated) {
+        onSettingsUpdated(updatedSettings)
+      }
       onClose()
+      
     } catch (err) {
       console.error("Apply failed:", err)
     } finally {
@@ -68,7 +79,10 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
     setIsLoading(true)
     try {
       const { id, ...newSettings } = form // exclude ID for creation
-      await createUserSettings(newSettings)
+      const createdSettings = await createUserSettings(newSettings)
+      if (onSettingsUpdated) {
+        onSettingsUpdated(createdSettings)
+      }
       onClose()
     } catch (err) {
       console.error("Create failed:", err)
@@ -82,6 +96,9 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
     setIsLoading(true)
     try {
       await deleteUserSettings(form.id)
+      if (onSettingsUpdated) {
+        onSettingsUpdated() // Notify parent that settings were deleted
+      }
       onClose()
     } catch (err) {
       console.error("Delete failed:", err)
@@ -96,6 +113,7 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
     const fetchProfiles = async () => {
       try {
         const allSettings = await getUserSettingsList()
+
         setExistingProfiles(allSettings)
         if (allSettings.length > 0) {
           // Find the user's with the last created at date (most recent)
@@ -227,6 +245,20 @@ export function UserSettingsModal({ isOpen, onClose, settings }: UserSettingsMod
               checked={form.enableVirtualKeyboard || false}
               onCheckedChange={(val) => handleChange("enableVirtualKeyboard", val)}
             />
+          </div>
+          { /* Navigation Mode Dropdown */}
+          <div>
+            <Label htmlFor="navigation-mode">Navigation Mode</Label>
+            <select
+              id="navigation-mode"
+              value={form.navigationMode}
+              onChange={(e) => handleChange("navigationMode", e.target.value)}
+              className="bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded"
+            >
+              <option value="DEFAULT">Default</option>
+              <option value="MOUSE">Mouse</option>
+              <option value="ARROW_KEYS">Arrow Keys</option>
+            </select>
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="size-multiplier">Size Multiplier</Label>

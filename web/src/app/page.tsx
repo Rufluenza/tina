@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getContacts, getContactWithMessages, getUserSettings, updateLastSelectedContact, getContactById } from "@/app/actions"
-import type { Contact } from "@/lib/types"
+import { getContacts, getContactWithMessages, getUserSettings, updateLastSelectedContact, getContactById, updateContactLastVisited } from "@/app/actions"
+import type { Contact, UserSettings } from "@/lib/types"
 import { useSettings } from "@/contexts/settings-context"
 import { ContactSidebar } from "@/components/contact-sidebar"
 import { MessageBubble } from "@/components/message-bubble"
@@ -30,8 +30,9 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
-  const [typedMessage, setTypedMessage] = useState("")
+  const [typedMessage, setTypedMessage] = useState<string>("")
   const [showSidebar, setShowSidebar] = useState(true)
+  
   // Load user settings on mount
   useEffect(() => {
     const loadUserSettings = async () => {
@@ -56,30 +57,14 @@ export default function MessagesPage() {
 
     if (fetchedContacts.length === 0) {
       setIsContactFormOpen(true)
-    } else if (!selectedContact) { // TODO: MAKE DEFAULT SELECTED CONTACT THE LAST ONE
-      // TODO: Get the contact with the most recent messages that are outgoing
-      // this is an id and should be the contact that is referenced
-      
-      if (currentUserSettings?.lastSelectedContact) {
-        const contact = await getContactById(currentUserSettings?.lastSelectedContact)
-        if (contact) {
-          setSelectedContact(contact)
-        } else {
-          setSelectedContact(fetchedContacts[0])
-        }
-      } else {
-        const contact = await getContactById(currentUserSettings?.lastSelectedContact)
-        console.log("Contact fetched by ID:", contact)
-        // how can i make sure it uses the number?
-
-        setSelectedContact(contact)
-      }
-
-
-      //setSelectedContact(fetchedContacts[0])
-      //scrollToBottom()
-
+    } else {
+      const sortedContacts = fetchedContacts.sort((a, b) => {
+        return (b.lastVisited?.getTime() || 0) - (a.lastVisited?.getTime() || 0)
+      })
+      setContacts(sortedContacts)
+      setSelectedContact(sortedContacts[0]) // Select the first contact by default
     }
+    
     setIsLoading(false)
   }
 
@@ -87,6 +72,8 @@ export default function MessagesPage() {
     const contact = await getContactWithMessages(contactId)
     if (contact) {
       setSelectedContact(contact)
+      // Update last visited time
+      await updateContactLastVisited(contactId)
       scrollToBottom()
     }
   }
@@ -172,7 +159,19 @@ export default function MessagesPage() {
       loadSelectedContact(selectedContact.id)
     }
   }
-
+  const handleSettingsUpdated = async (newSettings?: any) => { // Expects an optional settings object
+    if (newSettings) {
+      // If new settings are provided by the modal, use them directly
+      setCurrentUserSettings(newSettings);
+      setIsKeyboardEnabled(newSettings?.enableVirtualKeyboard || false);
+    } else {
+      // If no settings are provided (e.g., after a delete), refetch the latest
+      const settings = await getUserSettings();
+      setCurrentUserSettings(settings);
+      setIsKeyboardEnabled(settings?.enableVirtualKeyboard || false);
+    }
+    setIsUserSettingsOpen(false); // Close the modal
+  };
   
 
   if (isLoading) {
@@ -257,9 +256,18 @@ export default function MessagesPage() {
 
 
             {/* Message Input */}
-            <MessageInput contactId={selectedContact.id} onMessageSent={handleMessageSent} typedMessage={typedMessage} setTypedMessage={setTypedMessage} />
-            {/* Keyboard Component if user has developer mode enabled */}
-            { isKeyboardEnabled && (<Keyboard typedMessage={typedMessage} setTypedMessage={setTypedMessage} />)}
+            <MessageInput 
+              contactId={selectedContact.id} 
+              onMessageSent={handleMessageSent} 
+              typedMessage={typedMessage} 
+              setTypedMessage={setTypedMessage} />
+            {/* Keyboard Component if user has virtual keyboard enabled, TODO: Make Enter send message */}
+            { isKeyboardEnabled && (
+              <Keyboard 
+                typedMessage={typedMessage} 
+                setTypedMessage={setTypedMessage}
+
+              />)}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
@@ -286,11 +294,7 @@ export default function MessagesPage() {
       <UserSettingsModal
         isOpen={isUserSettingsOpen}
         onClose={() => setIsUserSettingsOpen(false)}
-        onSettingsUpdated={() => {
-          // Optionally handle settings update
-          
-          setIsUserSettingsOpen(false)
-        }}
+        onSettingsUpdated={handleSettingsUpdated}
       />
       {/* Edit Contact Modal */}
       <EditContactModal

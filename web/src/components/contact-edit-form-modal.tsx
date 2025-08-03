@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getContactsClean, updateContact } from "@/app/actions"
+import { getContactsClean, updateContact, deleteContact } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -108,6 +108,27 @@ export function EditContactModal({ isOpen, onClose, onContactUpdated }: EditCont
               className="bg-[#3b3b3d] border-gray-600 text-white"
             />
           </div>
+          { /* Only show delete button if a contact is selected */ }
+          {selectedId && (
+            <div className="flex justify-between items-center pt-4">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={async () => {
+                if (selectedId) {
+                  await deleteContact(selectedId)
+                  setSelectedId(null)
+                  setName("")
+                  setPhone("")
+                  onContactUpdated?.()
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              >
+                Delete Contact
+              </Button>
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"

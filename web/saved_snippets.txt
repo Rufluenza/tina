@@ -1,0 +1,32 @@
+database:
+model Contact {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  name     String   @default("")
+  messages Message[] @relation("Messages")
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  contactId Int
+  direction MessageDirection
+  contact   Contact  @relation("Messages", fields: [contactId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model UserSettings {
+  id        Int      @id @default(autoincrement())
+  name      String   @default("User Settings") // used as profile name
+  theme     String   @default("light")
+  language  String   @default("en")
+  developmentMode     Boolean @default(false)
+  enableSms           Boolean @default(true)
+  notificationsEnabled Boolean @default(true)
+  lastSelectedContact Int @unique
+  sizeMultiplier Int @default(1)
+  enableVirtualKeyboard Boolean @default(false)
+  createdAt DateTime  @default(now())
+}
+
