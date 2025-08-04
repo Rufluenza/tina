@@ -234,3 +234,12 @@ export async function getUserSettingsById(id: number) {
     where: { id },
   })
 }
+
+export async function getEnabledKeyboard() {
+  const settings = await getUserSettings()
+  if (settings?.navigationMode === "ARROW_KEYS") {
+    return true
+  } else {
+    return false
+  }
+}

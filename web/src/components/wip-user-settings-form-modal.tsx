@@ -34,7 +34,7 @@ interface UserSettingsModalProps {
 const menuItemList = [
   { label: "Name", value: "name", editType: "text" },
   { label: "Theme", value: "theme", editType: "list", options: ["light", "dark"] },
-  { label: "Language", value: "language", editType: "text" }, // editType: "list", options: ["en", "no", "sv", "da"] },
+  { label: "Language", value: "language", editType: "list", options: ["en", "no", "sv", "da"] },
   { label: "Development Mode", value: "developmentMode", editType: "check" },
   { label: "Enable SMS", value: "enableSms", editType: "check" },
   { label: "Notifications Enabled", value: "notificationsEnabled", editType: "check" },
@@ -81,36 +81,38 @@ export function UserSettingsModal({ isOpen, onClose, settings, onSettingsUpdated
   }, []) // Run on mount
 
   // Make navigation mode work with arrow keys
-  /*
+  
   useEffect(() => {
     if (!enableNavigation) return
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (hoveredMenuItemIndex === null) return
+      const tagName = (e.target as HTMLElement).tagName
+      if (tagName === "INPUT" || tagName === "SELECT" || tagName === "TEXTAREA") return // don't override form fields
+
+      if (["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) {
+        e.preventDefault()
+      }
 
       if (e.key === "ArrowUp") {
-        setHoveredMenuItemIndex((prev) => (prev > 0 ? prev - 1 : menuItemList.length - 1))
+        setHoveredMenuItemIndex((prev) => (prev! > 0 ? prev! - 1 : menuItemList.length - 1))
       } else if (e.key === "ArrowDown") {
-        setHoveredMenuItemIndex((prev) => (prev < menuItemList.length - 1 ? prev + 1 : 0))
+        setHoveredMenuItemIndex((prev) => (prev! < menuItemList.length - 1 ? prev! + 1 : 0))
       } else if (e.key === "Enter") {
-        const selectedMenuItem = menuItemList[hoveredMenuItemIndex]
-        if (selectedMenuItem) {
-          setSelectedMenuItem(selectedMenuItem)
-          const field = selectedMenuItem.value
-          const currentValue = form[field]
-          if (selectedMenuItem.editType === "check") {
-            handleChange(field, !currentValue) // Toggle boolean value
-          } else if (selectedMenuItem.editType === "text" || selectedMenuItem.editType === "number") {
-            // For text or number, we can just log or handle it differently
-            console.log(`Selected ${field}:`, currentValue)
-          } else if (selectedMenuItem.editType === "list") {
-            // For list, we can show options or handle it differently
-            console.log(`Selected ${field} options:`, selectedMenuItem.options)
-          }
+        const selectedItem = menuItemList[hoveredMenuItemIndex!]
+        if (selectedItem.editType === "check") {
+          const current = form[selectedItem.value as keyof UserSettings]
+          handleChange(selectedItem.value, !current)
         }
+        // Do NOT submit form
       }
     }
-  }, [hoveredMenuItemIndex, enableNavigation])
-  */
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [enableNavigation, hoveredMenuItemIndex, form])
+
+
+  
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
@@ -237,98 +239,60 @@ export function UserSettingsModal({ isOpen, onClose, settings, onSettingsUpdated
           </div>
           )}
 
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              className="bg-[#3b3b3d] border-gray-600 text-white"
-            />
-          </div>
+          {menuItemList.map((item, index) => {
+            const isSelected = enableNavigation && hoveredMenuItemIndex === index
+            const value = form[item.value as keyof UserSettings]
 
-          <div>
-            <Label htmlFor="theme">Theme</Label>
-            <select
-              id="theme"
-              value={form.theme}
-              onChange={(e) => handleChange("theme", e.target.value)}
-              className="bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
+            return (
+              <div
+                key={item.value}
+                className={`flex items-center justify-between border-b border-gray-700 py-1 px-2 rounded ${
+                  isSelected && enableNavigation ? "bg-gray-700" : ""
+                }`}
+              >
+                <Label htmlFor={item.value}>{item.label}</Label>
+                {item.editType === "text" && (
+                  <Input
+                    id={item.value}
+                    value={value as string}
+                    onChange={(e) => handleChange(item.value, e.target.value)}
+                    className="bg-[#3b3b3d] border-gray-600 text-white"
+                  />
+                )}
+                {item.editType === "number" && (
+                  <Input
+                    id={item.value}
+                    type="number"
+                    value={value as number}
+                    onChange={(e) => handleChange(item.value, parseFloat(e.target.value))}
+                    className="bg-[#3b3b3d] border-gray-600 text-white w-24"
+                  />
+                )}
+                {item.editType === "check" && (
+                  <Switch
+                    id={item.value}
+                    checked={Boolean(value)}
+                    onCheckedChange={(val) => handleChange(item.value, val)}
+                  />
+                )}
+                {item.editType === "list" && item.options && (
+                  <select
+                    id={item.value}
+                    value={value as string}
+                    onChange={(e) => handleChange(item.value, e.target.value)}
+                    className="bg-[#3b3b3d] border-gray-600 text-white p-2 rounded"
+                  >
+                    {item.options.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )
+          })}
 
-          <div>
-            <Label htmlFor="language">Language</Label>
-            <Input
-              id="language"
-              value={form.language}
-              onChange={(e) => handleChange("language", e.target.value)}
-              className="bg-[#3b3b3d] border-gray-600 text-white"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="dev-mode">Development Mode</Label>
-            <Switch
-              id="dev-mode"
-              checked={form.developmentMode}
-              onCheckedChange={(val) => handleChange("developmentMode", val)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sms">Enable SMS</Label>
-            <Switch
-              id="sms"
-              checked={form.enableSms}
-              onCheckedChange={(val) => handleChange("enableSms", val)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifications">Notifications</Label>
-            <Switch
-              id="notifications"
-              checked={form.notificationsEnabled}
-              onCheckedChange={(val) => handleChange("notificationsEnabled", val)}
-            />
-          </div>
-          { /* Add Virtual Keyboard Switch & size multiplier */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="virtual-keyboard">Enable Virtual Keyboard</Label>
-            <Switch
-              id="virtual-keyboard"
-              checked={form.enableVirtualKeyboard || false}
-              onCheckedChange={(val) => handleChange("enableVirtualKeyboard", val)}
-            />
-          </div>
-          { /* Navigation Mode Dropdown */}
-          <div>
-            <Label htmlFor="navigation-mode">Navigation Mode</Label>
-            <select
-              id="navigation-mode"
-              value={form.navigationMode}
-              onChange={(e) => handleChange("navigationMode", e.target.value)}
-              className="bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded"
-            >
-              <option value="DEFAULT">Default</option>
-              <option value="MOUSE">Mouse</option>
-              <option value="ARROW_KEYS">Arrow Keys</option>
-            </select>
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="size-multiplier">Size Multiplier</Label>
-            <Input
-              id="size-multiplier"
-              type="number"
-              value={form.sizeMultiplier || 1}
-              onChange={(e) => handleChange("sizeMultiplier", parseFloat(e.target.value))}
-              className="bg-[#3b3b3d] border-gray-600 text-white w-24"
-            />
-          </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button
