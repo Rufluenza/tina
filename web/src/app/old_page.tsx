@@ -51,13 +51,10 @@ export default function MessagesPage() {
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
   const [typedMessage, setTypedMessage] = useState<string>("")
   const [showSidebar, setShowSidebar] = useState(true)
-  const [showTopbar, setShowTopbar] = useState(true)
-  //const [focusedArea, setFocusedArea] = useState<any | null>(null)
-  //const [focusedAreaIndex, setFocusedAreaIndex] = useState<number | null>(null)
+  const [focusedArea, setFocusedArea] = useState<any | null>(null)
+  const [focusedAreaIndex, setFocusedAreaIndex] = useState<number | null>(null)
   const [arrowNavigation, setArrowNavigation] = useState<boolean>(false) // Whether arrow navigation is enabled
-  const { focusedArea, focusedAreaIndex } = useFocusNavigation(arrowNavigation) // Custom hook for focus navigation
-  const [topbarIndex, setTopbarIndex] = useState<number>(0) // Index for navigation through focusable areas
-  const [topbarItem, setTopbarItem] = useState<string | null>(null) // Currently focused navigation item
+  
   // Load user settings on mount
   useEffect(() => {
     const loadUserSettings = async () => {
@@ -67,11 +64,9 @@ export default function MessagesPage() {
 
       // Set initial focused area based on settings
       if (settings?.navigationMode === "ARROW_KEYS") {
-        //setFocusedArea("topbar") // Default focus area
-        //setFocusedAreaIndex(0)
+        setFocusedArea("topbar") // Default focus area
+        setFocusedAreaIndex(0)
         setArrowNavigation(true) // Enable arrow navigation
-      } else {
-        setArrowNavigation(false) // Disable arrow navigation
       }
     }
 
@@ -79,102 +74,6 @@ export default function MessagesPage() {
   }, [])
 
   // Focus management
-  useEffect(() => {
-    if (!arrowNavigation) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      console.log("Key pressed:", e.key)
-      // We're inside a section now
-      if (focusState.currentSection) {
-        console.log("Current active section:", focusState.currentSection)
-        const up = e.key === "ArrowUp"
-        const down = e.key === "ArrowDown"
-        const left = e.key === "ArrowLeft"
-        const right = e.key === "ArrowRight"
-        const enter = e.key === "Enter"
-
-        if (e.key === "Escape") {
-          focusState.clearFocus()
-          console.log("Focus cleared")
-        }
-        const section = focusState.currentSection
-        if (section === "topbar") {
-          const btnIndex = topbarIndex
-          var dir = 0 // 1 for right, -1 for left
-          console.log("Topbar item index:", btnIndex)
-          if (e.key === "ArrowLeft") {
-            // Move focus to the previous topbar button
-            if (topbarIndex > 0) {
-              dir = -1
-              // const oldButton = document.getElementById(topbarButtons[btnIndex])
-              // if (oldButton) {
-              //   oldButton.classList.remove("bg-white")
-              //   oldButton.classList.add("bg-gray-700")
-              // }
-              // setTopbarIndex(btnIndex - 1)
-              // setTopbarItem(topbarButtons[btnIndex - 1])
-
-              // console.log("Focused on previous topbar button:", topbarButtons[btnIndex - 1])
-              // const newButton = document.getElementById(topbarButtons[btnIndex - 1])
-              // if (newButton) {
-              //   newButton.classList.remove("bg-gray-700")
-              //   newButton.classList.add("bg-white")
-              // }
-            }
-          } else if (e.key === "ArrowRight") {
-            if (topbarIndex < topbarButtons.length - 1) {
-              dir = 1
-              // setTopbarIndex(btnIndex + 1)
-              // setTopbarItem(topbarButtons[btnIndex + 1])
-              // console.log("Focused on next topbar button:", topbarButtons[btnIndex + 1])
-            }
-          }
-          if (dir !== 0) {
-            // Move focus to the next/previous button
-            const newIndex = (btnIndex + dir + topbarButtons.length) % topbarButtons.length
-            setTopbarIndex(newIndex)
-            setTopbarItem(topbarButtons[newIndex])
-            console.log("Focused on topbar button:", topbarButtons[newIndex])
-            
-            // add
-            const oldButton = document.getElementById(topbarButtons[btnIndex])
-            if (oldButton) {
-              // Remove the on hover effect
-              oldButton.classList.remove("hover")
-              // Will this remove the hover effect?
-
-              oldButton.classList.remove("bg-white")
-              oldButton.classList.add("bg-gray-700")
-            }
-            const newButton = document.getElementById(topbarButtons[newIndex])
-            if (newButton) {
-              // Add the on hover effect
-              newButton.classList.add("hover")
-              // will this activate the hover?
-              // a: 
-              newButton.classList.remove("bg-gray-700")
-              newButton.classList.add("bg-white")
-            }
-            
-            
-          }
-        } else if (section === "sidebar") {
-          // Handle sidebar navigation if needed
-          console.log("Navigating sidebar, current section:", section)
-
-        }
-
-        
-      } else {
-        console.log("Not focused, hovering over:", focusState.currentSection)
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [arrowNavigation, focusedArea, focusedAreaIndex, topbarIndex, topbarItem])
-  
-  /*
   useEffect(() => {
     if (currentUserSettings?.navigationMode === "ARROW_KEYS") {
       if (!focusedAreaIndex) return
@@ -218,7 +117,7 @@ export default function MessagesPage() {
       }
     } else return
   }, [])
-  */
+
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" })
@@ -365,10 +264,6 @@ export default function MessagesPage() {
       setTypedMessage(""); // Clear the input after sending
     }
   }
-
-  const handleBackPress = () => {
-    setShowTopbar(!showTopbar)
-  }
   
 
   if (isLoading) {
@@ -398,64 +293,55 @@ export default function MessagesPage() {
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-600 bg-[#2d2d2d] flex items-center justify-between">
-              { /* only show the top bar if showTopbar is true from here --- */}
-              { showTopbar && (
-                <div>
-                
-                  <div>
-                    <h2 className="text-white font-semibold">{selectedContact.name || selectedContact.phone}</h2>
-                    {selectedContact.name && selectedContact.name !== selectedContact.phone && (
-                      <p className="text-sm text-gray-400">{selectedContact.phone}</p>
-                    )}
-                  </div>
-                  {/* Toggle Sidebar Button */}
-                  <Button
-                    onClick={() => setShowSidebar(!showSidebar)}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="toggle-sidebar-button"
-                  >
-                    {showSidebar ? "Hide Sidebar" : "Show Sidebar"}
-                  </Button>
-                  {/* New Contact Button */}
-                  <Button
-                    onClick={() => setIsContactFormOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="new-contact-button"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Contact
-                  </Button>
-                  {/* User Settings Button */}
-                  <Button
-                    onClick={() => setIsUserSettingsOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="user-settings-button"
-                  >
-                    User Settings
-                  </Button>
-                  {/* Edit Contact Button */}
-                  <Button
-                    onClick={() => setIsEditContactOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    
-                    id="edit-contact-button"
-                  >
-                    Edit Contact
-                  </Button>
-                </div>
-              )}
-            
-
+              <div>
+                <h2 className="text-white font-semibold">{selectedContact.name || selectedContact.phone}</h2>
+                {selectedContact.name && selectedContact.name !== selectedContact.phone && (
+                  <p className="text-sm text-gray-400">{selectedContact.phone}</p>
+                )}
+              </div>
+              {/* Toggle Sidebar Button */}
+              <Button
+                onClick={() => setShowSidebar(!showSidebar)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-gray-700"
+                id="toggle-sidebar-button"
+              >
+                {showSidebar ? "Hide Sidebar" : "Show Sidebar"}
+              </Button>
+              {/* New Contact Button */}
+              <Button
+                onClick={() => setIsContactFormOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-gray-700"
+                id="new-contact-button"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Contact
+              </Button>
+              {/* User Settings Button */}
+              <Button
+                onClick={() => setIsUserSettingsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-gray-600"
+                id="user-settings-button"
+              >
+                User Settings
+              </Button>
+              {/* Edit Contact Button */}
+              <Button
+                onClick={() => setIsEditContactOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-gray-700"
+                id="edit-contact-button"
+              >
+                Edit Contact
+              </Button>
             </div>
-            { /* End of showTopbar if true */}
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {selectedContact.messages?.map((message) => (
@@ -477,7 +363,6 @@ export default function MessagesPage() {
                 typedMessage={typedMessage} 
                 setTypedMessage={setTypedMessage}
                 onEnter={handleEnterPress}
-                onBack={handleBackPress}
               />)}
           </>
         ) : (

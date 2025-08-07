@@ -55,5 +55,7 @@ export interface UserSettings {
 export interface KeyboardProps {
   typedMessage: string
   setTypedMessage: React.Dispatch<React.SetStateAction<string>>
+  onEnter?: () => void
+  onBack?: () => void
   //setTypedMessage: (message: string) => void
 }

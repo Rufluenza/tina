@@ -51,7 +51,6 @@ export default function MessagesPage() {
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
   const [typedMessage, setTypedMessage] = useState<string>("")
   const [showSidebar, setShowSidebar] = useState(true)
-  const [showTopbar, setShowTopbar] = useState(true)
   //const [focusedArea, setFocusedArea] = useState<any | null>(null)
   //const [focusedAreaIndex, setFocusedAreaIndex] = useState<number | null>(null)
   const [arrowNavigation, setArrowNavigation] = useState<boolean>(false) // Whether arrow navigation is enabled
@@ -70,8 +69,6 @@ export default function MessagesPage() {
         //setFocusedArea("topbar") // Default focus area
         //setFocusedAreaIndex(0)
         setArrowNavigation(true) // Enable arrow navigation
-      } else {
-        setArrowNavigation(false) // Disable arrow navigation
       }
     }
 
@@ -134,29 +131,19 @@ export default function MessagesPage() {
             const newIndex = (btnIndex + dir + topbarButtons.length) % topbarButtons.length
             setTopbarIndex(newIndex)
             setTopbarItem(topbarButtons[newIndex])
-            console.log("Focused on topbar button:", topbarButtons[newIndex])
-            
-            // add
+            // add and remove classes for focus
             const oldButton = document.getElementById(topbarButtons[btnIndex])
             if (oldButton) {
-              // Remove the on hover effect
-              oldButton.classList.remove("hover")
-              // Will this remove the hover effect?
-
-              oldButton.classList.remove("bg-white")
-              oldButton.classList.add("bg-gray-700")
+              oldButton.classList.remove("bg-white text-gray-800")
+              oldButton.classList.add("bg-gray-700 text-gray-400")
             }
             const newButton = document.getElementById(topbarButtons[newIndex])
             if (newButton) {
-              // Add the on hover effect
-              newButton.classList.add("hover")
-              // will this activate the hover?
-              // a: 
-              newButton.classList.remove("bg-gray-700")
-              newButton.classList.add("bg-white")
+              newButton.classList.remove("bg-gray-700 text-gray-400")
+              newButton.classList.add("bg-white text-gray-800")
             }
-            
-            
+
+            console.log("Focused on topbar button:", topbarButtons[newIndex])
           }
         } else if (section === "sidebar") {
           // Handle sidebar navigation if needed
@@ -365,10 +352,6 @@ export default function MessagesPage() {
       setTypedMessage(""); // Clear the input after sending
     }
   }
-
-  const handleBackPress = () => {
-    setShowTopbar(!showTopbar)
-  }
   
 
   if (isLoading) {
@@ -398,64 +381,55 @@ export default function MessagesPage() {
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-600 bg-[#2d2d2d] flex items-center justify-between">
-              { /* only show the top bar if showTopbar is true from here --- */}
-              { showTopbar && (
-                <div>
-                
-                  <div>
-                    <h2 className="text-white font-semibold">{selectedContact.name || selectedContact.phone}</h2>
-                    {selectedContact.name && selectedContact.name !== selectedContact.phone && (
-                      <p className="text-sm text-gray-400">{selectedContact.phone}</p>
-                    )}
-                  </div>
-                  {/* Toggle Sidebar Button */}
-                  <Button
-                    onClick={() => setShowSidebar(!showSidebar)}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="toggle-sidebar-button"
-                  >
-                    {showSidebar ? "Hide Sidebar" : "Show Sidebar"}
-                  </Button>
-                  {/* New Contact Button */}
-                  <Button
-                    onClick={() => setIsContactFormOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="new-contact-button"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Contact
-                  </Button>
-                  {/* User Settings Button */}
-                  <Button
-                    onClick={() => setIsUserSettingsOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    id="user-settings-button"
-                  >
-                    User Settings
-                  </Button>
-                  {/* Edit Contact Button */}
-                  <Button
-                    onClick={() => setIsEditContactOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
-                    
-                    id="edit-contact-button"
-                  >
-                    Edit Contact
-                  </Button>
-                </div>
-              )}
-            
-
+              <div>
+                <h2 className="text-white font-semibold">{selectedContact.name || selectedContact.phone}</h2>
+                {selectedContact.name && selectedContact.name !== selectedContact.phone && (
+                  <p className="text-sm text-gray-400">{selectedContact.phone}</p>
+                )}
+              </div>
+              {/* Toggle Sidebar Button */}
+              <Button
+                onClick={() => setShowSidebar(!showSidebar)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-white"
+                id="toggle-sidebar-button"
+              >
+                {showSidebar ? "Hide Sidebar" : "Show Sidebar"}
+              </Button>
+              {/* New Contact Button */}
+              <Button
+                onClick={() => setIsContactFormOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-white"
+                id="new-contact-button"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Contact
+              </Button>
+              {/* User Settings Button */}
+              <Button
+                onClick={() => setIsUserSettingsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="m-4 border-gray-600 text-white bg-gray-700 hover:bg-white"
+                id="user-settings-button"
+              >
+                User Settings
+              </Button>
+              {/* Edit Contact Button */}
+              <Button
+                onClick={() => setIsEditContactOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-gray-600 text-white bg-gray-700 hover:bg-white"
+                id="edit-contact-button"
+              >
+                Edit Contact
+              </Button>
             </div>
-            { /* End of showTopbar if true */}
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {selectedContact.messages?.map((message) => (
@@ -477,7 +451,6 @@ export default function MessagesPage() {
                 typedMessage={typedMessage} 
                 setTypedMessage={setTypedMessage}
                 onEnter={handleEnterPress}
-                onBack={handleBackPress}
               />)}
           </>
         ) : (

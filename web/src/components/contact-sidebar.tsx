@@ -10,6 +10,7 @@ interface ContactSidebarProps {
 }
 
 export function ContactSidebar({ contacts, selectedContactId, onSelectContact }: ContactSidebarProps) {
+  
   return (
     <div className="w-80 bg-[#2d2d2d] border-r border-gray-600 flex flex-col">
       <div className="p-4 border-b border-gray-600">

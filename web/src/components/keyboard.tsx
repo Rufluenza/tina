@@ -18,10 +18,10 @@ const keys = [
 
 
 
-export default function Keyboard({ typedMessage, setTypedMessage }: KeyboardProps) {
+export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBack }: KeyboardProps) {
   const [isCapsLock, setIsCapsLock] = useState(false)
   const [enableNavigation, setEnableNavigation] = useState(false) // while testing this will be true later it will be dependent on the userSettings
-  
+  const [activeFocus, setActiveFocus] = useState(false) // this will be used to enable focus on the keyboard
   const [hoveredKeyIndex, setHoveredKeyIndex] = useState<[number, number]>([0, 0])
   const [previousHoveredKeyIndex, setPreviousHoveredKeyIndex] = useState<[number, number]>([0, 0])
   const hoveredKey = keys[hoveredKeyIndex[1]]?.[hoveredKeyIndex[0]] || null
@@ -42,6 +42,23 @@ export default function Keyboard({ typedMessage, setTypedMessage }: KeyboardProp
     }
     fetchSettings()
   }, []) // Run on mount
+
+  // Focus management
+  /*
+  useEffect(() => {
+    const handleFocusChange = (e: CustomEvent) => {
+      if (e.detail === "keyboard") {
+        setActiveFocus(true)
+        
+      } else {
+        setActiveFocus(false)
+      }
+    }
+
+    document.addEventListener("focus-change", handleFocusChange as EventListener)
+    return () => document.removeEventListener("focus-change", handleFocusChange as EventListener)
+  }, [])
+  */
   useEffect(() => {
     if (!enableNavigation) return
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -93,6 +110,17 @@ export default function Keyboard({ typedMessage, setTypedMessage }: KeyboardProp
       setTypedMessage(prev => prev + " ")
     } else if (key === "Caps Lock") {
       setIsCapsLock(prev => !prev)
+    } else if (key === "Enter") {
+      if (onEnter) {
+        onEnter()
+      } else {
+        setTypedMessage(prev => prev + "\n")
+      }
+    } else if (key === "Back") {
+      if (onBack) {
+        onBack()
+      }
+      console.log("Back key pressed")
     }
     /*else if (["Enter", "Caps Lock", "Back"].includes(key)) {
       console.log(`Special key pressed: ${key}`)
@@ -118,6 +146,7 @@ export default function Keyboard({ typedMessage, setTypedMessage }: KeyboardProp
                   ${key === 'Space' ? 'w-64' : 'w-10'}
                   ${['Backspace', 'Enter'].includes(key) ? 'w-20' : ''}
                   ${['Back', 'Caps Lock'].includes(key) ? 'w-24' : ''}
+                  ${['Caps Lock'].includes(key) ? (isCapsLock ? 'bg-green-600' : 'bg-gray-800') : ''}
                   ${['Å', 'Æ', 'Ø', '"'].includes(key) ? 'w-10' : ''}
                   ${enableNavigation && hoveredKey === key && hoveredKeyIndex[1] === rowIndex && hoveredKeyIndex[0] === keyIndex ? 'bg-blue-600' : ''}
                 `}

@@ -40,7 +40,13 @@ const menuItemList = [
   { label: "Notifications Enabled", value: "notificationsEnabled", editType: "check" },
   { label: "Enable Virtual Keyboard", value: "enableVirtualKeyboard", editType: "check" },
   { label: "Size Multiplier", value: "sizeMultiplier", editType: "number"},
-  { label: "Navigation Mode", value: "navigationMode", editType: "list", options: Object.values(NavigationMode) }
+  { label: "Navigation Mode", value: "navigationMode", editType: "list", options: Object.values(NavigationMode) },
+  /*
+  { label: "Cancel", value: "cancel", editType: "button" },
+  { label: "Apply", value: "apply", editType: "button" },
+  { label: "Create", value: "create", editType: "button" },
+  { label: "Delete", value: "delete", editType: "button" }
+   */
 ]
 
 export function UserSettingsModal({ isOpen, onClose, settings, onSettingsUpdated }: UserSettingsModalProps) {
@@ -79,6 +85,8 @@ export function UserSettingsModal({ isOpen, onClose, settings, onSettingsUpdated
     }
     fetchSettings()
   }, []) // Run on mount
+  
+
 
   // Make navigation mode work with arrow keys
   
