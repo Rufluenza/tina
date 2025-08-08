@@ -59,3 +59,19 @@ export interface KeyboardProps {
   onBack?: () => void
   //setTypedMessage: (message: string) => void
 }
+
+export interface CommunicationItem {
+  id: string;
+  text?: string;
+  image?: string;
+  x: number; // column position (0-based)
+  y: number; // row position (0-based)
+  isFixed?: boolean;
+  function?: () => void;
+  isEmpty?: boolean;
+}
+
+export interface GridDimensions {
+  rows: number;
+  cols: number;
+}

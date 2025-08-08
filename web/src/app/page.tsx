@@ -450,6 +450,16 @@ export default function MessagesPage() {
                   >
                     Edit Contact
                   </Button>
+                  {/* Open communication board /communication-board as url */}
+                  <Button
+                    onClick={() => window.open("/communication-board", "_blank")}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
+                    id="communication-board-button"
+                  >
+                    Communication Board
+                  </Button>
                 </div>
               )}
             
