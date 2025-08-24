@@ -450,7 +450,7 @@ export default function MessagesPage() {
                   >
                     Edit Contact
                   </Button>
-                  {/* Open communication board /communication-board as url */}
+                  {/* Open communication board /communication-board as url but in the current window */}
                   <Button
                     onClick={() => window.open("/communication-board", "_blank")}
                     variant="outline"
@@ -459,6 +459,16 @@ export default function MessagesPage() {
                     id="communication-board-button"
                   >
                     Communication Board
+                  </Button>
+                  {/* Open /main-menu page as url */}
+                  <Button
+                    onClick={() => window.open("/main-menu", "_blank")}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-white bg-gray-700 hover:bg-white"
+                    id="main-menu-button"
+                  >
+                    Main Menu
                   </Button>
                 </div>
               )}

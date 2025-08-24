@@ -60,6 +60,12 @@ export interface KeyboardProps {
   //setTypedMessage: (message: string) => void
 }
 
+export interface MainMenuProps {
+  //handleSelectContact?: () => void
+  previousPage?: string // url for either communication board or / (message page)
+  onSelectContact?: (contactId: number) => void
+}
+
 export interface CommunicationItem {
   id: string;
   text?: string;
