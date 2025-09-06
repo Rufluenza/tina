@@ -282,33 +282,7 @@ export default function MessagesPage() {
       console.error("WebSocket connection error:", error)
     }
   }, []) // This effect should run only once on mount
-  /*
-  useEffect(() => {
-    loadContacts()
-    try {
-      const socket = new WebSocket(`ws://localhost:3000`)
-      
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-
-        if (data.type === "new-message") {
-          setSelectedContact((prev) => {
-            if (prev?.id === data.contactId) {
-              loadSelectedContact(data.contactId)
-            }
-            return prev
-          })
-        }
-      }
-
-      return () => {
-        socket.close()
-      }
-    } catch (error) {
-      console.error("WebSocket connection error:", error)
-    }
-  }, [])
-  */
+  
 
   useEffect(() => {
     scrollToBottom(false)
@@ -452,7 +426,7 @@ export default function MessagesPage() {
                   </Button>
                   {/* Open communication board /communication-board as url but in the current window */}
                   <Button
-                    onClick={() => window.open("/communication-board", "_blank")}
+                    onClick={() => window.location.href = "/communication-board"}
                     variant="outline"
                     size="sm"
                     className="border-gray-600 text-white bg-gray-700 hover:bg-white"
@@ -462,7 +436,7 @@ export default function MessagesPage() {
                   </Button>
                   {/* Open /main-menu page as url */}
                   <Button
-                    onClick={() => window.open("/main-menu", "_blank")}
+                    onClick={() => window.location.href = "/main-menu"}
                     variant="outline"
                     size="sm"
                     className="border-gray-600 text-white bg-gray-700 hover:bg-white"

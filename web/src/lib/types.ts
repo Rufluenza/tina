@@ -57,6 +57,8 @@ export interface KeyboardProps {
   setTypedMessage: React.Dispatch<React.SetStateAction<string>>
   onEnter?: () => void
   onBack?: () => void
+  usageType?: string // This is for when the keyboard is used in different contexts, like text in modal or chat
+  onArrow?: (direction: "UP" | "DOWN" | "LEFT" | "RIGHT") => void // optional, only needed if usageType is 'chat'
   //setTypedMessage: (message: string) => void
 }
 

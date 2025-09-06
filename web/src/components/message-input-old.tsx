@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
 import type React from "react"
+
+import { useEffect, useState } from "react"
 import { sendMessage } from "@/app/actions"
 import { MessageDirection } from "@/lib/types"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Send } from "lucide-react"
 
 interface MessageInputProps {
@@ -17,22 +19,15 @@ interface MessageInputProps {
 export function MessageInput({ contactId, onMessageSent, typedMessage, setTypedMessage }: MessageInputProps) {
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Sync controlled prop
+  // If typedMessage is provided, make message reflect it
   useEffect(() => {
     if (typedMessage !== undefined) {
+      
+
       setMessage(typedMessage)
     }
   }, [typedMessage])
-
-  // Auto resize on content change
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "0px" // reset first
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px"
-    }
-  }, [message])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,23 +47,15 @@ export function MessageInput({ contactId, onMessageSent, typedMessage, setTypedM
 
   return (
     <form onSubmit={handleSubmit} className="p-4 border-t border-gray-600">
-      <div className="flex gap-2 items-end">
-        <textarea
-          ref={textareaRef}
+      <div className="flex gap-2">
+        <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type a message..."
+          className="flex-1 bg-[#3b3b3d] border-gray-600 text-white placeholder-gray-400"
           disabled={isLoading}
-          rows={1}
-          className="flex-1 resize-none bg-[#3b3b3d] border border-gray-600 text-white placeholder-gray-400 
-                     rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#428aff] 
-                     max-h-40 overflow-y-auto"
         />
-        <Button
-          type="submit"
-          disabled={isLoading || !message.trim()}
-          className="bg-[#428aff] hover:bg-[#3a7ae4] h-10 w-10 flex items-center justify-center rounded-lg"
-        >
+        <Button type="submit" disabled={isLoading || !message.trim()} className="bg-[#428aff] hover:bg-[#3a7ae4]">
           <Send className="w-4 h-4" />
         </Button>
       </div>

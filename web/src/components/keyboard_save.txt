@@ -1,0 +1,74 @@
+const handleKeyPress = (key: string) => {
+    if (key === "Backspace") {
+      setTypedMessage(prev => prev.slice(0, -1))
+    } else if (key === "Space") {
+      setTypedMessage(prev => prev + " ")
+    } else if (key === "Caps Lock") {
+      setIsCapsLock(prev => !prev)
+    } else if (key === "Enter") {
+      if (onEnter) {
+        onEnter()
+      } else {
+        setTypedMessage(prev => prev + "\n")
+      }
+    } else if (key === "Back") {
+      if (onBack) {
+        onBack()
+      }
+      console.log("Back key pressed")
+    }
+    /*else if (["Enter", "Caps Lock", "Back"].includes(key)) {
+      console.log(`Special key pressed: ${key}`)
+    }*/ else {
+      const normalizedKey = isCapsLock ? key.toUpperCase() : key.toLowerCase()
+      setTypedMessage(prev => prev + normalizedKey)
+    }
+  }
+
+
+  
+
+const handleKeyPress = (key: string) => {
+    if (key === "Backspace") {
+      if (typedMessage.length === 0 || messagePointer === 0) return
+      setTypedMessage(prev => prev.slice(0, messagePointer - 1) + prev.slice(messagePointer))
+      setMessagePointer(prev => Math.max(prev - 1, 0))
+    }
+    else if (key === "Space") {
+      //setTypedMessage(prev => prev + " ")
+      setTypedMessage(prev => prev.slice(0, messagePointer) + " " + prev.slice(messagePointer))
+      setMessagePointer(prev => prev + 1)
+    } else if (key === "Caps Lock") {
+      setIsCapsLock(prev => !prev)
+    } else if (key === "↵" || key === "Enter") {
+      if (onEnter) {
+        onEnter()
+      } else {
+        setTypedMessage(prev => prev + "\n")
+      }
+    } else if (key === "Back") {
+
+      if (onBack) {
+        onBack()
+      }
+      console.log("Back key pressed")
+    }
+    else if (["↑", "↓", "←", "→"].includes(key)) {
+      const direction = key === "↑" ? "UP" : key === "↓" ? "DOWN" : key === "←" ? "LEFT" : "RIGHT"
+
+      if (direction === "LEFT") {
+        setMessagePointer(prev => Math.max(prev - 1, 0))
+      } else if (direction === "RIGHT") {
+        setMessagePointer(prev => Math.min(prev + 1, typedMessage.length))
+      }
+      if (onArrow) onArrow(direction)
+    }
+
+    else {
+      const normalizedKey = isCapsLock ? key.toUpperCase() : key.toLowerCase()
+      setTypedMessage(prev => prev.slice(0, messagePointer) + normalizedKey + prev.slice(messagePointer))
+      setMessagePointer(prev => prev + 1)
+    }
+    console.log("Message Pointer: " + messagePointer);
+    console.log("Text in pointer: " + typedMessage[messagePointer - 1]);
+  }

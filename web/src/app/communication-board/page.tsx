@@ -11,7 +11,7 @@ const sampleItems: CommunicationItem[] = [
     x: 0,
     y: 0,
     // go to page with url / (meaning home page)
-    function: () => window.location.href = '/'
+    function: () => window.location.href = '/sms'
   },
   {
     id: '2',
