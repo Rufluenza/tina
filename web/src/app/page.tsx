@@ -347,6 +347,7 @@ export default function MessagesPage() {
 
   if (isLoading) {
     return (
+      window.location.href="/sms",
       <div className="h-screen bg-[#1e1e1e] flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
@@ -354,6 +355,7 @@ export default function MessagesPage() {
   }
 
   return (
+    
     <div className="h-screen bg-[#1e1e1e] flex">
       {/* open / close sidebar button */}
 

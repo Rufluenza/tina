@@ -5,6 +5,7 @@ import { getContactsClean, updateContact, deleteContact } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { Contact } from "@/lib/types"
 import Keyboard from "./keyboard"
 
@@ -24,16 +25,16 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
 
   const [activeField, setActiveField] = useState<"phone" | "name" | null>(null)
   const [hoveredItem, setHoveredItem] = useState(0) // 0=contact select, 1=phone, 2=name, 3=cancel, 4=save
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [dropdownIndex, setDropdownIndex] = useState(0) // index in contacts
 
-  // ---- Keyboard navigation ----
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [dropdownIndex, setDropdownIndex] = useState(0)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return
-      if (activeField) return // ignore when typing
+      if (activeField) return // when a field is active, ignore navigation
 
-      // --- When dropdown is open ---
+      // Dropdown navigation
       if (dropdownOpen) {
         if (e.key === "ArrowDown") {
           e.preventDefault()
@@ -54,25 +55,13 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
         return
       }
 
-      // --- Normal navigation ---
+      // Normal navigation
       if (e.key === "ArrowDown") {
         setHoveredItem(i => Math.min(i + 1, 4))
       } else if (e.key === "ArrowUp") {
         setHoveredItem(i => Math.max(i - 1, 0))
-      } else if (e.key === "ArrowRight") {
-        if (hoveredItem === 3) {
-          setHoveredItem(4)
-        }
-      } else if (e.key === "ArrowLeft") {
-        if (hoveredItem === 4) {
-          setHoveredItem(3)
-        }
-      }
-      else if (e.key === "Enter") {
-        if (hoveredItem === 0) {
-          setDropdownOpen(true)
-          setDropdownIndex(0)
-        } else if (hoveredItem === 1) {
+      } else if (e.key === "Enter") {
+        if (hoveredItem === 1) {
           setActiveField("phone")
         } else if (hoveredItem === 2) {
           setActiveField("name")
@@ -85,20 +74,22 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [hoveredItem, isOpen, activeField, dropdownOpen, contacts, dropdownIndex])
+  }, [hoveredItem, isOpen, activeField, dropdownOpen, dropdownIndex, contacts])
 
-  // ---- Fetch contacts ----
+
+  // Fetch contacts on open
   useEffect(() => {
     const fetchContacts = async () => {
       const result = await getContactsClean()
       setContacts(result)
     }
+
     if (isOpen) {
       fetchContacts()
     }
   }, [isOpen])
 
-  // ---- Fill form when selecting contact ----
+  // Populate form when a contact is selected
   useEffect(() => {
     if (selectedId !== null) {
       const selected = contacts.find((c) => c.id === selectedId)
@@ -109,7 +100,6 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
     }
   }, [selectedId, contacts])
 
-  // ---- Submit ----
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId || !phone.trim()) return
@@ -130,43 +120,27 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
   }
 
   return (
-    <div className="bg-[#2d2d2d] border-gray-600 text-white p-4 w-full">
+    <div className="bg-[#2d2d2d] border-gray-600 text-white p-4 max-w-md w-full">
       <h2 className="text-lg font-semibold mb-4">Edit Contact</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Contact select */}
+        
         <div>
           <Label htmlFor="contact-select">Select Contact</Label>
-          <div
-            className={`relative bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded cursor-pointer ${
-              hoveredItem === 0 ? "ring-2 ring-blue-500" : ""
-            }`}
-            onClick={() => setDropdownOpen(o => !o)}
+          <select
+            id="contact-select"
+            value={selectedId ?? ""}
+            onChange={(e) => setSelectedId(Number(e.target.value))}
+            className="bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded"
+            required
           >
-            {selectedId
-              ? contacts.find(c => c.id === selectedId)?.name || "Select contact"
-              : "-- Choose contact --"}
-          </div>
-          {dropdownOpen && (
-            <ul className="absolute z-10 bg-[#3b3b3d] border border-gray-600 mt-1 w-full max-h-48 overflow-y-auto rounded shadow-lg">
-              {contacts.map((c, idx) => (
-                <li
-                  key={c.id}
-                  className={`p-2 cursor-pointer ${
-                    idx === dropdownIndex ? "bg-blue-600" : "hover:bg-[#4b4b4d]"
-                  }`}
-                  onClick={() => {
-                    setSelectedId(c.id)
-                    setDropdownOpen(false)
-                  }}
-                >
-                  {c.name || c.phone}
-                </li>
-              ))}
-            </ul>
-          )}
+            <option value="">-- Choose contact --</option>
+            {contacts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name || c.phone}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {/* Phone */}
         <div>
           <Label htmlFor="edit-phone">Phone</Label>
           <Input
@@ -174,15 +148,17 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            onFocus={() => setActiveField("phone")}
-            className={`bg-[#3b3b3d] border-gray-600 text-white ${
-              hoveredItem === 1 ? "ring-2 ring-blue-500" : ""
-            }`}
+            onFocus={(e) => setActiveField("phone")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                setActiveField(null)
+              }
+            }}
+            className={`bg-[#3b3b3d] border-gray-600 text-white ${hoveredItem === 1 ? "ring-2 ring-blue-500" : ""}`}
             required
           />
         </div>
-
-        {/* Name */}
         <div>
           <Label htmlFor="edit-name">Name</Label>
           <Input
@@ -190,71 +166,64 @@ export function EditContact({ isOpen, onClose, onContactUpdated }: EditContactPr
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onFocus={() => setActiveField("name")}
-            className={`bg-[#3b3b3d] border-gray-600 text-white ${
-              hoveredItem === 2 ? "ring-2 ring-blue-500" : ""
-            }`}
+            onFocus={(e) => setActiveField("name")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                setActiveField(null)
+              }
+            }}
+            className={`bg-[#3b3b3d] border-gray-600 text-white ${hoveredItem === 2 ? "ring-2 ring-blue-500" : ""}`}
             required
           />
         </div>
-
-        {/* Delete + Buttons */}
+            
+        { /* Only show delete button if a contact is selected */ }
         {selectedId && (
           <div className="flex justify-between items-center pt-4">
             <Button
               type="button"
               variant="destructive"
               onClick={async () => {
-                if (selectedId) {
-                  await deleteContact(selectedId)
-                  setSelectedId(null)
-                  setName("")
-                  setPhone("")
-                  onContactUpdated?.()
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700"
+              if (selectedId) {
+                await deleteContact(selectedId)
+                setSelectedId(null)
+                setName("")
+                setPhone("")
+                onContactUpdated?.()
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700"
             >
               Delete Contact
             </Button>
           </div>
         )}
-
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className={`bg-[#3b3b3d] border-gray-600 text-white ${
-              hoveredItem === 3 ? "ring-2 ring-blue-500" : ""
-            }`}
+            className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            disabled={isLoading} 
-            className={`bg-[#3b3b3d] border-gray-600 text-white ${
-              hoveredItem === 4 ? "ring-2 ring-blue-500" : ""
-            }`}
-          >
+          <Button type="submit" disabled={isLoading} className="bg-[#428aff] hover:bg-[#3a7ae4]">
             {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>
+        
 
-      {/* Full-width keyboard */}
+      
       {activeField && (
-        <div className="fixed bottom-0 left-0 right-0 z-50">
-          <Keyboard
-            typedMessage={activeField === "phone" ? phone : name}
-            setTypedMessage={activeField === "phone" ? setPhone : setName}
-            onEnter={() => setActiveField(null)}
-            onBack={() => setActiveField(null)} // Revert to previous state
-            usageType={activeField === "phone" ? "phone" : "form"}
-          />
-        </div>
+        <Keyboard
+          typedMessage={activeField === "phone" ? phone : name}
+          setTypedMessage={activeField === "phone" ? setPhone : setName}
+          onEnter={() => setActiveField(null)} // pressing Enter in virtual keyboard also hides it
+          usageType="form"
+        />
       )}
     </div>
-  )
+  );
 }

@@ -58,7 +58,6 @@ export function MessageInput({ contactId, onMessageSent, typedMessage, setTypedM
   return (
     <form onSubmit={handleSubmit} className="p-4 border-t border-gray-600">
       <div className="flex gap-2 items-end">
-        
         <textarea
           ref={textareaRef}
           value={message}
@@ -70,18 +69,6 @@ export function MessageInput({ contactId, onMessageSent, typedMessage, setTypedM
                      rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#428aff] 
                      max-h-40 overflow-y-auto"
         />
-        {/*
-        <div className="flex-1 bg-gray-800 rounded-lg px-4 py-2 text-white min-h-[40px] max-h-[120px] overflow-y-auto">
-          
-          <div className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed">
-            {beforeCursor}
-            <span className="inline-block w-[2px] h-[1.2em] bg-white animate-blink align-middle" />
-            {afterCursor}
-            
-            {typedMessage.length === 0 && <span className="text-gray-500">Type a message...</span>}
-          </div>
-        </div>
-        */}
         <Button
           type="submit"
           disabled={isLoading || !message.trim()}

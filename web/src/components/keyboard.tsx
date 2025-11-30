@@ -37,18 +37,34 @@ export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBac
   const buttonRefs = useRef<(HTMLButtonElement | null)[][]>([])
 
   const keys = useMemo(() => {
-    const baseKeys = [
-      ["Back", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "Backspace"],
-      ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Å", '"'],
-      ["Caps Lock", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Æ", "Ø", "↵"],
-      ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "-"],
-      ["Space"]
-    ]
+    var baseKeys: string[][] = []
+    if (usageType !== "phone") {
+      baseKeys = [
+        ["Back", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "Backspace"],
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Å", '"'],
+        ["Caps Lock", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Æ", "Ø", "↵"],
+        ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "-"],
+        ["Space"]
+      ]
+    }
+    if (usageType === "phone") {
+      baseKeys = [
+        ["1", "2", "3"],
+        ["4", "5", "6"],
+        ["7", "8", "9"],
+        ["+", "0", "-"],
+        ["Back", "Backspace", "↵"]
+      ]
+    }
+
+    
 
     if (usageType === "chat") {
       baseKeys[3].push("↑") // Unicode arrows
       baseKeys[4].push("←", "↓", "→")
     }
+    
+    
     return baseKeys
   }, [usageType])
   const hoveredKey = keys[hoveredKeyIndex[1]]?.[hoveredKeyIndex[0]] || null

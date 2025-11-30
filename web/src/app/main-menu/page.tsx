@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ContactSidebar } from "@/components/contact-sidebar"
-import { UserSettingsModal } from "@/components/user-settings-form-modal"
+import { UserSettingsForm } from "@/components/user-settings-form"
 import { EditContactModal } from "@/components/contact-edit-form-modal"
 import { getContacts, getUserSettings, updateContactLastVisited, updateLastSelectedContact } from "@/app/actions"
 import { MainMenuProps } from "@/lib/types"
@@ -122,7 +122,7 @@ export default function MainMenuPage({ previousPage }: MainMenuProps) {
           >
             Back
           </Button>
-          <UserSettingsModal isOpen={true} onClose={() => setActiveView("main")} />
+          <UserSettingsForm isOpen={true} onClose={() => setActiveView("main")} />
         </div>
       )}
 

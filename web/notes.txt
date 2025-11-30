@@ -13,5 +13,16 @@ npm run dev
 Run websocket:
 npx tsx src/lib/websocket-server.ts
 
+Connect to rpi:
+ssh pi@raspberrypi
 
-const mode = settings.navigationMode as NavigationMode
+Run the sms listener on rpi (tmux session recommended):
+tmux
+
+cd ~/Desktop/tina/rpi_sms
+./start.sh
+
+To exit tmux session:
+Ctrl + b, then d
+
+#const mode = settings.navigationMode as NavigationMode

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import type { Contact } from "@/lib/types"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { ContactFormModal } from "@/components/contact-form-modal"
-import { EditContactModal } from "@/components/contact-edit-form-modal"
+import { CreateContactForm } from "@/components/create-contact-form"
+import { EditContact } from "@/components/contact-edit-form"
 import { getContacts, getUserSettings } from "@/app/actions"
 interface ContactSidebarProps {
   contacts: Contact[]
@@ -90,15 +90,13 @@ export function ContactSidebar({ contacts, selectedContactId, onSelectContact }:
           }
         }
       }
-      
     }
-    
 
     window.addEventListener("keydown", handleKeyDown)
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [hoveredItem])
+  }, [hoveredItem, isContactFormOpen, isEditContactOpen])
 
   // useEffect on moving with arrow keys to select contacts or buttons
   return (
@@ -126,44 +124,55 @@ export function ContactSidebar({ contacts, selectedContactId, onSelectContact }:
           Add Contact
         </Button>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {fetchedContacts.map((contact) => {
-          const lastMessage = contact.messages[contact.messages.length - 1]
-          return (
-            <div
-              key={contact.id}
-              onClick={() => onSelectContact(contact.id)}
-              className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-[#3b3b3d] transition-colors ${
-                selectedContactId === contact.id && hoveredItem === null || hoveredItem !== null && hoveredItem > 1 && fetchedContacts[hoveredItem - 2]?.id === contact.id ? "bg-[#428aff]" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-white font-medium">{contact.name || contact.phone}</h3>
-                {lastMessage && (
-                  <span className="text-xs text-gray-400">{format(new Date(lastMessage.createdAt), "MMM d")}</span>
+      {!isContactFormOpen && !isEditContactOpen && (
+        
+        <div className="flex-1 overflow-y-auto">
+          {fetchedContacts.map((contact) => {
+            const lastMessage = contact.messages[contact.messages.length - 1]
+            return (
+              <div
+                key={contact.id}
+                onClick={() => onSelectContact(contact.id)}
+                className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-[#3b3b3d] transition-colors ${
+                  selectedContactId === contact.id && hoveredItem === null || hoveredItem !== null && hoveredItem > 1 && fetchedContacts[hoveredItem - 2]?.id === contact.id ? "bg-[#428aff]" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-white font-medium">{contact.name || contact.phone}</h3>
+                  {lastMessage && (
+                    <span className="text-xs text-gray-400">{format(new Date(lastMessage.createdAt), "MMM d")}</span>
+                  )}
+                </div>
+                {contact.name && contact.name !== contact.phone && (
+                  <p className="text-sm text-gray-400">{contact.phone}</p>
                 )}
+                {lastMessage && <p className="text-sm text-gray-300 truncate mt-1">{lastMessage.content}</p>}
               </div>
-              {contact.name && contact.name !== contact.phone && (
-                <p className="text-sm text-gray-400">{contact.phone}</p>
-              )}
-              {lastMessage && <p className="text-sm text-gray-300 truncate mt-1">{lastMessage.content}</p>}
-            </div>
-          )
-        })}
-      </div>
-      {/* Contact Form Modal */}
-      <ContactFormModal
-        isOpen={isContactFormOpen}
-        onClose={() => setIsContactFormOpen(false)}
-        onContactCreated={handleContactCreated}
-      />
-      {/* Edit Contact Modal */}
+            )
+          })}
+        </div>
+      )}
       
-      <EditContactModal
-        isOpen={isEditContactOpen}
-        onClose={() => setIsEditContactOpen(false)}
-        onContactUpdated={handleContactCreated}
-      />
+      {/* Contact Form Modal */}
+      {isContactFormOpen && (
+        <CreateContactForm
+          isOpen={isContactFormOpen}
+          onClose={() => setIsContactFormOpen(false)}
+          onContactCreated={handleContactCreated}
+        />
+      )}
+      
+      {/* Edit Contact Modal */}
+      {isEditContactOpen && (
+        <EditContact
+          isOpen={isEditContactOpen}
+          onClose={() => setIsEditContactOpen(false)}
+          onContactUpdated={handleContactCreated}
+        />
+      )}
+      
+      
+      
       
     </div>
     
