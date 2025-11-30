@@ -13,7 +13,7 @@ curl -X POST http://<pi-ip>:8000/send \
      -d '{"phone": "52228856", "message": "Hello!"}'
 
 receive SMS:
-curl http://<pi-ip>:8000/receive
+curl http://raspberrypi:8000/receive
 """
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -22,8 +22,8 @@ from webhook import handle_incoming_sms
 
 app = FastAPI()
 sms = SMSHandler()
-sms.set_callback(handle_incoming_sms)
-sms.start_receiver_thread()  # Starts listening for incoming messages
+#sms.set_callback(handle_incoming_sms)
+#sms.start_receiver_thread()  # Starts listening for incoming messages
 
 class SMSRequest(BaseModel):
     phone: str
