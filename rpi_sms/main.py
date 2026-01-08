@@ -23,7 +23,7 @@ from webhook import handle_incoming_sms
 app = FastAPI()
 sms = SMSHandler()
 sms.set_callback(handle_incoming_sms)
-#sms.start_receiver_thread()  # Starts listening for incoming messages
+sms.start_receiver_thread()  # Starts listening for incoming messages
 
 class SMSRequest(BaseModel):
     phone: str

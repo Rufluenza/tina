@@ -1,5 +1,6 @@
 // lib/sms-api.ts
-const RPI_BASE_URL = "http://192.168.1.217:8000"
+// This is the old sms api
+const RPI_BASE_URL = "http://raspberrypi:8000"
 
 export async function sendSMS(phone: string, message: string) {
   const res = await fetch(`${RPI_BASE_URL}/send`, {

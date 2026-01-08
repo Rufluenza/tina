@@ -1,0 +1,47 @@
+The port was /dev/mobile
+
+sudo gammu-config
+
+Send sms
+echo "Test message sent from my RPi" | sudo gammu --sendsms TEXT 004552228856
+
+echo "Sending an SMS from my Raspberry Pi" | sudo gammu-smsd-inject TEXT 004552228856
+
+Go to mysql console
+sudo mysql -u root -p
+
+Get sms
+sudo gammu getallsms
+
+Installing MariaDB
+sudo apt-get install mariadb-server mariadb-client
+
+Initial setup
+sudo mariadb_secure_installation
+The first root pwd prompt can be left empty
+
+Then set no to using unix_socket authentication
+
+Then set password for root user
+
+Then set no to remove anonymous users
+
+Then set yes to disallow root login remotely
+
+Then set yes to remove test database and access to it
+
+Then set yes to reload privilege tables
+
+GRANT USAGE ON *.* TO 'smsd'@'raspberrypi' IDENTIFIED BY 'M!ndbK0d3';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `smsd`.* TO 'smsd'@'raspberrypi';
+CREATE DATABASE smsd;
+
+GRANT USAGE ON *.* TO 'smsd'@'localhost' IDENTIFIED BY 'M!ndbK0d3';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `smsd`.* TO 'smsd'@'localhost';
+CREATE DATABASE smsd;
+
+
+
+
+GRANT USAGE ON *.* TO 'ruben'@'rubensmac' IDENTIFIED BY 'M!ndbK0d3';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `smsd`.* TO 'ruben'@'rubensmac';

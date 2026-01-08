@@ -1,4 +1,5 @@
 // src/lib/sms.ts
+// DELETE ME
 import { SerialPort } from "serialport"
 
 const SERIAL_PORT = "/dev/serial0"
