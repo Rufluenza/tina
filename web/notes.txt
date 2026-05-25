@@ -26,3 +26,18 @@ To exit tmux session:
 Ctrl + b, then d
 
 #const mode = settings.navigationMode as NavigationMode
+
+
+On the raspberry pi
+The configuration file:
+sudo nano /etc/gammu-smsdrc
+
+
+http://raspberrypi/phpmyadmin
+root
+
+
+to send sms over cli use:
+echo "Sending an SMS from my Raspberry Pi" | gammu-smsd-inject TEXT "004552228856"
+
+But we need to simply add a db entry to send a sms

@@ -15,3 +15,9 @@ AT+CMGF=1
 {then the correct message without brackets}
 
 PROPPER POWER TO GSM MODULE:
+
+
+
+AFTER GAMMU:
+For sending a new message use CreateOutboxSMS instead of creating with command line
+So add a database entry instead
