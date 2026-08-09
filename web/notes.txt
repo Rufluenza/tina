@@ -35,7 +35,7 @@ sudo nano /etc/gammu-smsdrc
 
 http://raspberrypi/phpmyadmin
 root
-
+min db kode
 
 to send sms over cli use:
 echo "Sending an SMS from my Raspberry Pi" | gammu-smsd-inject TEXT "004552228856"

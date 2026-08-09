@@ -161,6 +161,7 @@ export async function sendMessage(contactId: number, content: string, direction:
     if (!contact) {
       throw new Error("Contact not found")
     }
+    // contact.phone change +45 to 0045 maybe
     await sendSMS(contact.phone, content)
     return message
   } catch (error) {
@@ -170,6 +171,7 @@ export async function sendMessage(contactId: number, content: string, direction:
 }
 
 export async function receiveMessage(contactId: number, content: string) {
+  // content = TextDecoded from the database, contactId is the SenderNumber from the database
   try {
     const message = await prisma.message.create({
       data: {
