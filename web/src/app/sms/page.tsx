@@ -111,7 +111,7 @@ export default function MessagesPage() {
           setSelectedContact((prev) => {
             if (prev?.id === data.contactId) {
               
-              loadSelectedContact(data.contactId)
+              queueMicrotask(() => loadSelectedContact(data.contactId))
             }
             return prev
           })
