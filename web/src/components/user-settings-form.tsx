@@ -9,6 +9,7 @@ import { getUserSettings, updateUserSettings } from "@/app/actions"
 import { NavigationMode, type UserSettings } from "@/lib/types"
 
 export function UserSettingsForm({ onSettingsUpdated }: { onSettingsUpdated?: (s: UserSettings) => void }) {
+  
   const [form, setForm] = useState<UserSettings | null>(null)
   const [hoveredItem, setHoveredItem] = useState(0)
   const [activeField, setActiveField] = useState<string | null>(null)
@@ -60,8 +61,15 @@ export function UserSettingsForm({ onSettingsUpdated }: { onSettingsUpdated?: (s
           handleChange("notificationsEnabled", !form?.notificationsEnabled)
         else if (field === "enableVirtualKeyboard")
           handleChange("enableVirtualKeyboard", !form?.enableVirtualKeyboard)
+        else if (field === "navigationMode")
+          handleChange(
+            "navigationMode",
+            form?.navigationMode === "ARROW_KEYS" ? "MOUSE" : "ARROW_KEYS"
+          )
         else if (field === "apply") handleApply()
         else if (field === "cancel") window.history.back()
+      } else if (e.key === "Escape") {
+        window.history.back()
       }
     }
 
@@ -77,6 +85,7 @@ export function UserSettingsForm({ onSettingsUpdated }: { onSettingsUpdated?: (s
     if (!form) return
     const updated = await updateUserSettings(form, form.id)
     onSettingsUpdated?.(updated)
+    window.history.back()
   }
 
   if (!form) return null
@@ -152,6 +161,42 @@ export function UserSettingsForm({ onSettingsUpdated }: { onSettingsUpdated?: (s
             onCheckedChange={v => handleChange("enableVirtualKeyboard", v)}
           />
         </div>
+
+        <div className={`flex justify-between ${hoveredItem === 6 ? "ring-2 ring-blue-500" : ""}`}>
+          <Label>Notifications Enabled</Label>
+          <Switch
+            checked={form.notificationsEnabled}
+            onCheckedChange={v => handleChange("notificationsEnabled", v)}
+          />
+        </div>
+
+        <div className={`flex justify-between ${hoveredItem === 7 ? "ring-2 ring-blue-500" : ""}`}>
+          <Label>Navigation Mode</Label>
+          <select
+            value={form.navigationMode}
+            onChange={e => handleChange("navigationMode", e.target.value as NavigationMode)}
+            className={`bg-[#3b3b3d] border-gray-600 text-white w-full p-2 rounded ${
+              hoveredItem === 7 ? "ring-2 ring-blue-500" : ""
+            }`}
+          >
+            <option value="ARROW_KEYS">Arrow Keys</option>
+            <option value="MOUSE">Mouse</option>
+          </select>
+        </div>
+
+        <div className={`flex justify-between ${hoveredItem === 8 ? "ring-2 ring-blue-500" : ""}`}>
+          <Label>Size Multiplier</Label>
+          <Input
+            type="number"
+            value={form.sizeMultiplier}
+            onChange={e => handleChange("sizeMultiplier", parseFloat(e.target.value))}
+            className={`bg-[#3b3b3d] border-gray-600 text-white ${
+              hoveredItem === 8 ? "ring-2 ring-blue-500" : ""
+            }`}
+          />
+        </div>
+
+        
         {/* ...repeat for remaining fields... */}
 
         {/* Buttons */}

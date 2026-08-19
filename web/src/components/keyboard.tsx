@@ -26,7 +26,7 @@ Unicode arrows:
 */
 const messagePointerEnabled = false
 
-export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBack, usageType, onArrow }: KeyboardProps) {
+export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBack, usageType, onArrow }: KeyboardProps) { //messagePointer
   
   const [isCapsLock, setIsCapsLock] = useState(false)
   const [enableNavigation, setEnableNavigation] = useState(false) // while testing this will be true later it will be dependent on the userSettings
@@ -252,7 +252,7 @@ export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBac
                 key={keyIndex}
                 variant="outline"
                 className={`
-                  h-10 font-medium text-sm text-white bg-gray-800 border-gray-600 hover:bg-gray-700
+                  h-10 font-medium text-sm text-white bg-gray-800 border-gray-600 hover:bg-blue-600 hover:text-white
                   ${key === 'Space' ? 'w-64' : 'w-10'}
                   ${['Backspace', '↵'].includes(key) ? 'w-20' : ''}
                   ${['Back', 'Caps Lock'].includes(key) ? 'w-24' : ''}

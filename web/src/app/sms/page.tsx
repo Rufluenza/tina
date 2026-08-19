@@ -42,7 +42,7 @@ export default function MessagesPage() {
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
   const [typedMessage, setTypedMessage] = useState<string>("")
-  
+  //const [messagePointer, setMessagePointer] = useState<number>(0) // Track cursor position in the message input
   const [arrowNavigation, setArrowNavigation] = useState<boolean>(false) // Whether arrow navigation is enabled
   const [messageScrollPos, setMessageScrollPos] = useState<number>(0) // Track scroll position for messages
   // Load user settings on mount
@@ -54,10 +54,12 @@ export default function MessagesPage() {
 
       // Set initial focused area based on settings
       if (settings?.navigationMode === "ARROW_KEYS") {
+        document.documentElement.classList.add("hide-cursor")
         //setFocusedArea("topbar") // Default focus area
         //setFocusedAreaIndex(0)
         setArrowNavigation(true) // Enable arrow navigation
       } else {
+        document.documentElement.classList.remove("hide-cursor")
         setArrowNavigation(false) // Disable arrow navigation
       }
     }
@@ -149,6 +151,7 @@ export default function MessagesPage() {
           console.error("Error sending message:", error);
         });
       setTypedMessage(""); // Clear the input after sending
+      //setMessagePointer(0); // Reset cursor position // ADDED
     }
   }
 
@@ -225,12 +228,17 @@ export default function MessagesPage() {
               contactId={selectedContact.id} 
               onMessageSent={handleMessageSent} 
               typedMessage={typedMessage} 
-              setTypedMessage={setTypedMessage} />
+              setTypedMessage={setTypedMessage}
+              //messagePointer={messagePointer} // ADDED
+              //setMessagePointer={setMessagePointer} // ADDED
+            />
             {/* Keyboard Component if user has virtual keyboard enabled */}
             { isKeyboardEnabled && (
               <Keyboard 
                 typedMessage={typedMessage} 
                 setTypedMessage={setTypedMessage}
+                //messagePointer={messagePointer} // ADDED
+                //setMessagePointer={setMessagePointer} // ADDED
                 onEnter={handleEnterPress}
                 onBack={handleBackPress}
                 usageType={"chat"}
