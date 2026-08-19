@@ -8,6 +8,13 @@ html.hide-cursor * {
   cursor: none !important;
   pointer-events: none !important;
 }
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.animate-caret-blink {
+  animation: caret-blink 1s step-end infinite;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

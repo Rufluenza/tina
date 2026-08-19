@@ -26,14 +26,14 @@ Unicode arrows:
 */
 const messagePointerEnabled = false
 
-export default function Keyboard({ typedMessage, setTypedMessage, onEnter, onBack, usageType, onArrow }: KeyboardProps) { //messagePointer
+export default function Keyboard({ typedMessage, setTypedMessage, messagePointer, setMessagePointer, onEnter, onBack, usageType, onArrow }: KeyboardProps) { //messagePointer
   
   const [isCapsLock, setIsCapsLock] = useState(false)
   const [enableNavigation, setEnableNavigation] = useState(false) // while testing this will be true later it will be dependent on the userSettings
   const [activeFocus, setActiveFocus] = useState(false) // this will be used to enable focus on the keyboard
   const [hoveredKeyIndex, setHoveredKeyIndex] = useState<[number, number]>([0, 0])
   const [previousHoveredKeyIndex, setPreviousHoveredKeyIndex] = useState<[number, number]>([0, 0])
-  const [messagePointer, setMessagePointer] = useState(typedMessage.length) // This will be used to track the position in the typedMessage for arrow key navigation within the text
+  //const [messagePointer, setMessagePointer] = useState(typedMessage.length) // This will be used to track the position in the typedMessage for arrow key navigation within the text
   const buttonRefs = useRef<(HTMLButtonElement | null)[][]>([])
 
   const keys = useMemo(() => {

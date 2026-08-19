@@ -55,8 +55,8 @@ export interface UserSettings {
 export interface KeyboardProps {
   typedMessage: string
   setTypedMessage: React.Dispatch<React.SetStateAction<string>>
-  //messagePointer: number
-  //setMessagePointer: React.Dispatch<React.SetStateAction<number>>
+  messagePointer: number
+  setMessagePointer: React.Dispatch<React.SetStateAction<number>>
   onEnter?: () => void
   onBack?: () => void
   usageType?: string // This is for when the keyboard is used in different contexts, like text in modal or chat

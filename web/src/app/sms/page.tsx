@@ -42,7 +42,7 @@ export default function MessagesPage() {
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false) // Based on user settings
   const [currentUserSettings, setCurrentUserSettings] = useState<any>(null) // Adjust type as needed
   const [typedMessage, setTypedMessage] = useState<string>("")
-  //const [messagePointer, setMessagePointer] = useState<number>(0) // Track cursor position in the message input
+  const [messagePointer, setMessagePointer] = useState<number>(0) // Track cursor position in the message input
   const [arrowNavigation, setArrowNavigation] = useState<boolean>(false) // Whether arrow navigation is enabled
   const [messageScrollPos, setMessageScrollPos] = useState<number>(0) // Track scroll position for messages
   // Load user settings on mount
@@ -151,7 +151,7 @@ export default function MessagesPage() {
           console.error("Error sending message:", error);
         });
       setTypedMessage(""); // Clear the input after sending
-      //setMessagePointer(0); // Reset cursor position // ADDED
+      setMessagePointer(0); // Reset cursor position // ADDED
     }
   }
 
@@ -229,16 +229,15 @@ export default function MessagesPage() {
               onMessageSent={handleMessageSent} 
               typedMessage={typedMessage} 
               setTypedMessage={setTypedMessage}
-              //messagePointer={messagePointer} // ADDED
-              //setMessagePointer={setMessagePointer} // ADDED
+              messagePointer={messagePointer} // ADDED
             />
             {/* Keyboard Component if user has virtual keyboard enabled */}
             { isKeyboardEnabled && (
               <Keyboard 
                 typedMessage={typedMessage} 
                 setTypedMessage={setTypedMessage}
-                //messagePointer={messagePointer} // ADDED
-                //setMessagePointer={setMessagePointer} // ADDED
+                messagePointer={messagePointer} // ADDED
+                setMessagePointer={setMessagePointer} // ADDED
                 onEnter={handleEnterPress}
                 onBack={handleBackPress}
                 usageType={"chat"}
